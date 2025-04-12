@@ -70,16 +70,16 @@ def get_weighted_overall_sentiment(headlines):
 
     average_weighted_score = total_weighted_score / total_weight
 
-    if average_weighted_score >= 3:
+    if average_weighted_score >= 5:
         return "Very Positive"
-    elif average_weighted_score > 0:
+    elif average_weighted_score >= 2:
         return "Positive"
-    elif average_weighted_score == 0:
-        return "Neutral"
-    elif average_weighted_score <= -3:
+    elif average_weighted_score <= -2:
+        return "Negative"
+    elif average_weighted_score <= -5:
         return "Very Negative"
     else:
-        return "Negative"
+        return "Neutral"
 
 # --- Streamlit UI ---
 st.title("📈 Stock News Sentiment Analyzer")
