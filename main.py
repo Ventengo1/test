@@ -1,4 +1,4 @@
-import re
+import re 
 import streamlit as st
 import requests
 import yfinance as yf
@@ -105,22 +105,26 @@ st.set_page_config(layout="wide")
 
 st.markdown("""
     <style>
-        body {
-            background-color: #f4f6f9;
-            color: #000000;
-        }
-        .main {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 10px;
-        }
+    body {
+        background-color: #f9f9f9;
+        color: #000000;
+    }
+    h2, h5, p, small, b {
+        color: #000000;
+    }
+    .css-1d391kg, .css-1cpxqw2 {  /* override Streamlit container */
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-radius: 10px;
+        padding: 1rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
     <div style='background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 10px; text-align: center; color: #000000;'>
         <h2 style='margin-bottom: 0;'>📈 Stock Sentiment Analyzer</h2>
-        <p style='margin-top: 5px; color: #555;'>News + Sentiment + Charts in one dashboard</p>
+        <p style='margin-top: 5px; color: #333;'>News + Sentiment + Charts in one dashboard</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -179,17 +183,15 @@ if ticker:
 
             for item in scored_articles:
                 color = sentiment_colors[item['sentiment']]
-                with st.container():
-                    st.markdown(f"""
-                        <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
-                            <h5 style='color: {color};'>{item['sentiment']}</h5>
-                            <b>{item['title']}</b><br>
-                            <i>{item['snippet']}</i><br>
-                            <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
-                            <a href="{item['link']}" target="_blank">🔗 Read More</a>
-                        </div>
-                    """, unsafe_allow_html=True)
-
+                st.markdown(f"""
+                    <div style='background: #ffffff; border: 1px solid #e0e0e0; border-left: 5px solid {color}; padding: 15px; margin-bottom: 15px; border-radius: 8px;'>
+                        <h5 style='color: {color}; margin-bottom: 5px;'>{item['sentiment']}</h5>
+                        <b style='font-size: 1.05rem;'>{item['title']}</b><br>
+                        <p style='margin: 5px 0 5px 0; color: #333;'>{item['snippet']}</p>
+                        <small style='color: #666;'>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
+                        <a href="{item['link']}" target="_blank" style='color: #0A66C2;'>🔗 Read Article</a>
+                    </div>
+                """, unsafe_allow_html=True)
         else:
             st.warning("No news articles found in the last 14 days.")
 
@@ -206,12 +208,11 @@ if ticker:
         except Exception as e:
             st.error(f"Chart error: {e}")
 
-        st.markdown("---")
-        st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
+            st.markdown("### 🏢 Company Overview")
             st.markdown(f"""
-                <div style='background-color: #ffffff; padding: 15px; border-radius: 10px; color: black; font-size: 16px;'>
+                <div style='background: #ffffff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 1.05rem;'>
                     <b>Sector:</b> {info.get("sector", "N/A")}<br>
                     <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
                     <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
@@ -219,5 +220,5 @@ if ticker:
                     <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
                 </div>
             """, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Company info error: {e}")
+        except:
+            st.info("Company info not available.")
