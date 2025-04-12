@@ -97,12 +97,22 @@ if ticker:
         fourteen_days_ago = datetime.now() - timedelta(days=14)
         filtered_news = []
         for item in news:
-            pub_date = item.get("pubDate")
-            if pub_date:
-                # Convert pub_date to datetime
-                pub_date = datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %Z")
-                if pub_date >= fourteen_days_ago:
+            pub_date_str = item.get("pubDate", None)
+            if pub_date_str:
+                try:
+                    # Try parsing the date, handle various formats
+                    pub_date = datetime.strptime(pub_date_str, "%a, %d %b %Y %H:%M:%S %Z")
+                except ValueError:
+                    # If parsing fails, attempt another format
+                    try:
+                        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%dT%H:%M:%S%z")
+                    except ValueError:
+                        # Handle unexpected date formats here
+                        pub_date = None
+
+                if pub_date and pub_date >= fourteen_days_ago:
                     filtered_news.append(item)
+            
             if len(filtered_news) >= 25:
                 break
 
