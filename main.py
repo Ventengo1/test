@@ -179,7 +179,7 @@ if ticker:
         else:
             st.warning("No news articles found in the last 14 days.")
 
-    with col2:
+with col2:
         st.markdown("### 📉 30-Day Stock Chart")
         try:
             end_date = datetime.today()
@@ -192,21 +192,24 @@ if ticker:
         except Exception as e:
             st.error(f"Chart error: {e}")
 
-        st.markdown("### 🧾 Company Overview")
+        # --- Company Overview ---
+        st.markdown("### 🏢 Company Overview")
         try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            ticker_obj = yf.Ticker(ticker)
+            info = ticker_obj.info
+            description = info.get("longBusinessSummary", "No overview available.")
 
             st.markdown(f"""
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #ccc;'>
-                <b>Company:</b> {info.get("longName", "N/A")}<br>
-                <b>Sector:</b> {info.get("sector", "N/A")}<br>
-                <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
-                <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100, 2) if info.get("dividendYield") else "N/A"}%<br>
-                <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}<br>
-            </div>
+                <div style="
+                    background-color: #ffffff;
+                    color: #000000;
+                    padding: 1rem;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    font-size: 0.9rem;
+                ">
+                    {description}
+                </div>
             """, unsafe_allow_html=True)
-
         except Exception as e:
-            st.error("Unable to load company overview.")
+            st.warning(f"Couldn't load company overview: {e}")
