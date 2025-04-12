@@ -1,4 +1,4 @@
-import re 
+import re
 import streamlit as st
 import requests
 import yfinance as yf
@@ -101,24 +101,26 @@ sentiment_colors = {
 }
 
 # --- App UI ---
-st.set_page_config(layout="wide", page_title="Stock Sentiment Analyzer", page_icon="📈")
+st.set_page_config(layout="wide")
 
 st.markdown("""
     <style>
         body {
-            background-color: #f9f9f9;
-            font-family: "Segoe UI", sans-serif;
+            background-color: #f4f6f9;
+            color: #000000;
         }
-        .block-container {
-            padding: 2rem;
+        .main {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 10px;
         }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-    <div style='background: linear-gradient(to right, #f8f9fa, #e3e3e3); padding: 1.5rem; border-radius: 10px; text-align: center; color: #222;'>
-        <h2 style='color:#111;'>📈 Stock Sentiment Analyzer</h2>
-        <p style='font-size: 18px;'>Analyze stock headlines, news sentiment, and trends at a glance</p>
+    <div style='background: linear-gradient(to right, #e0eafc, #cfdef3); padding: 1.5rem; border-radius: 10px; text-align: center; color: black;'>
+        <h2>📈 Stock Sentiment Analyzer</h2>
+        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -204,17 +206,18 @@ if ticker:
         except Exception as e:
             st.error(f"Chart error: {e}")
 
+        st.markdown("---")
         st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
             st.markdown(f"""
-                <div style='background-color:white; padding: 20px; border-radius: 10px; color: black;'>
+                <div style='background-color: #ffffff; padding: 15px; border-radius: 10px; color: black; font-size: 16px;'>
                     <b>Sector:</b> {info.get("sector", "N/A")}<br>
                     <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
                     <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0) * 100, 2) if info.get("dividendYield") else "N/A"}%<br>
+                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100/100, 2) if info.get("dividendYield") else "N/A"}%<br>
                     <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
                 </div>
             """, unsafe_allow_html=True)
         except Exception as e:
-            st.error(f"Company overview error: {e}")
+            st.error(f"Company info error: {e}")
