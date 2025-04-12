@@ -106,25 +106,28 @@ st.set_page_config(layout="wide")
 st.markdown("""
     <style>
     body {
-        background-color: #f9f9f9;
-        color: #000000;
+        background-color: #f5f7fa;
     }
-    h2, h5, p, small, b {
-        color: #000000;
+    .main > div {
+        padding: 20px;
     }
-    .css-1d391kg, .css-1cpxqw2 {  /* override Streamlit container */
-        background-color: #ffffff !important;
-        color: #000000 !important;
+    h2, h3, h4, h5 {
+        color: #2c3e50;
+    }
+    .card {
+        background-color: #ffffff;
         border-radius: 10px;
-        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        margin-bottom: 20px;
     }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-    <div style='background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 10px; text-align: center; color: #000000;'>
-        <h2 style='margin-bottom: 0;'>📈 Stock Sentiment Analyzer</h2>
-        <p style='margin-top: 5px; color: #333;'>News + Sentiment + Charts in one dashboard</p>
+    <div class='card' style='text-align: center;'>
+        <h2>📈 Stock Sentiment Analyzer</h2>
+        <p style='color: #555;'>Color-coded headlines + sentiment summary + chart — all in one place!</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -172,30 +175,36 @@ if ticker:
             else:
                 overall = "Negative"
 
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
                 color = sentiment_colors[sentiment]
                 st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
 
             st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
-            st.markdown("---")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
             st.markdown("### 📰 Headlines")
 
             for item in scored_articles:
                 color = sentiment_colors[item['sentiment']]
                 st.markdown(f"""
-                    <div style='background: #ffffff; border: 1px solid #e0e0e0; border-left: 5px solid {color}; padding: 15px; margin-bottom: 15px; border-radius: 8px;'>
-                        <h5 style='color: {color}; margin-bottom: 5px;'>{item['sentiment']}</h5>
-                        <b style='font-size: 1.05rem;'>{item['title']}</b><br>
-                        <p style='margin: 5px 0 5px 0; color: #333;'>{item['snippet']}</p>
-                        <small style='color: #666;'>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
-                        <a href="{item['link']}" target="_blank" style='color: #0A66C2;'>🔗 Read Article</a>
+                    <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
+                        <h5 style='color: {color};'>{item['sentiment']}</h5>
+                        <b>{item['title']}</b><br>
+                        <i>{item['snippet']}</i><br>
+                        <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
+                        <a href="{item['link']}" target="_blank">🔗 Read More</a>
                     </div>
                 """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
         else:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.markdown("### 📉 30-Day Stock Chart")
         try:
             end_date = datetime.today()
@@ -207,18 +216,22 @@ if ticker:
                 st.info("No chart data available.")
         except Exception as e:
             st.error(f"Chart error: {e}")
+        st.markdown("</div>", unsafe_allow_html=True)
 
+        # Company Overview Card
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
-            st.markdown("### 🏢 Company Overview")
             st.markdown(f"""
-                <div style='background: #ffffff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 1.05rem;'>
-                    <b>Sector:</b> {info.get("sector", "N/A")}<br>
-                    <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
-                    <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100/100, 2) if info.get("dividendYield") else "N/A"}%<br>
-                    <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
+                <div style='color: black;'>
+                <b>Sector:</b> {info.get("sector", "N/A")}<br>
+                <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
+                <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
+                <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100/100, 2) if info.get("dividendYield") else "N/A"}%<br>
+                <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}<br>
                 </div>
             """, unsafe_allow_html=True)
-        except:
-            st.info("Company info not available.")
+        except Exception as e:
+            st.error("Company info unavailable.")
+        st.markdown("</div>", unsafe_allow_html=True)
