@@ -75,6 +75,7 @@ if ticker:
             }
             total_score = 0
             headline_count = 0
+            scored_headlines = []
 
             for item in news:
                 content = item.get("content", item)
@@ -87,11 +88,16 @@ if ticker:
                 total_score += score
                 headline_count += 1
 
-                with st.expander(f"[{sentiment}] {title}"):
-                    st.write(f"**Score:** {score}")
-                    st.write(f"**Positive hits:** {pos} | **Negative hits:** {neg}")
-                    st.write(f"[Read Article]({link})")
+                scored_headlines.append({
+                    "sentiment": sentiment,
+                    "title": title,
+                    "score": score,
+                    "pos": pos,
+                    "neg": neg,
+                    "link": link
+                })
 
+            # --- Summary section FIRST ---
             st.markdown("---")
             st.subheader("🧾 Sentiment Summary")
             for sentiment_type, count in sentiment_counts.items():
@@ -110,6 +116,17 @@ if ticker:
                 overall = "Negative"
 
             st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
+
+            # --- Then show the headlines ---
+            st.markdown("---")
+            st.subheader("📰 Headlines")
+
+            for item in scored_headlines:
+                with st.expander(f"[{item['sentiment']}] {item['title']}"):
+                    st.write(f"**Score:** {item['score']}")
+                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
+                    st.write(f"[Read Article]({item['link']})")
+
         else:
             st.warning("No news found for this ticker.")
     except Exception as e:
