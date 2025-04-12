@@ -23,7 +23,7 @@ very_negative_keywords = {
 
 # --- Sentiment scoring ---
 def get_sentiment_weighted(text):
-    words = re.findall(r'\b\w+\b', text.lower())
+    words = re.findall(r'\b\w+\b', text.lower())  # Split text into lowercase words
     score = 0
     pos_count = neg_count = 0
 
@@ -54,7 +54,35 @@ def get_sentiment_weighted(text):
 
     return sentiment, score, pos_count, neg_count
 
+# --- Function to calculate weighted overall sentiment ---
+def get_weighted_overall_sentiment(headlines):
+    total_weighted_score = 0
+    total_weight = 0
+
+    for item in headlines:
+        score = item['score']
+        weight = max(1, abs(score))  # More extreme = more weight
+        total_weighted_score += score * weight
+        total_weight += weight
+
+    if total_weight == 0:
+        return "Neutral"
+
+    average_weighted_score = total_weighted_score / total_weight
+
+    if average_weighted_score >= 3:
+        return "Very Positive"
+    elif average_weighted_score > 0:
+        return "Positive"
+    elif average_weighted_score == 0:
+        return "Neutral"
+    elif average_weighted_score <= -3:
+        return "Very Negative"
+    else:
+        return "Negative"
+
 # --- Streamlit UI ---
+st.set_page_config(page_title="Stock Sentiment Analyzer", layout="wide")
 st.title("📈 Stock News Sentiment Analyzer")
 st.subheader("Analyze recent news headlines for stock sentiment")
 
@@ -117,15 +145,26 @@ if ticker:
 
             st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
 
-            # --- Then show the headlines ---
+            # --- Weighted Overall Sentiment ---
+            weighted_overall = get_weighted_overall_sentiment(scored_headlines)
+            st.markdown(f"**🧠 Weighted Sentiment (Strength-Based):** {weighted_overall}")
+
+            # --- Headlines Section ---
             st.markdown("---")
             st.subheader("📰 Headlines")
 
             for item in scored_headlines:
-                with st.expander(f"[{item['sentiment']}] {item['title']}"):
-                    st.write(f"**Score:** {item['score']}")
-                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
-                    st.write(f"[Read Article]({item['link']})")
+                st.markdown(
+                    f"""
+                    <div style="padding: 20px 25px; margin-bottom: 30px; border-radius: 12px; background-color: #f9f9f9; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 10px;">[{item['sentiment']}] {item['title']}</h4>
+                        <p style="margin: 5px 0;"><strong>Score:</strong> {item['score']}</p>
+                        <p style="margin: 5px 0;"><strong>Positive hits:</strong> {item['pos']} | <strong>Negative hits:</strong> {item['neg']}</p>
+                        <a href="{item['link']}" target="_blank">🔗 Read Article</a>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
         else:
             st.warning("No news found for this ticker.")
