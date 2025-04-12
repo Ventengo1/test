@@ -202,7 +202,8 @@ with col2:
         market_cap = round(info.get("marketCap", 0) / 1e9, 2)
         pe_ratio = info.get("trailingPE", "N/A")
         dividend_yield = (
-            f"{round(info.get('dividendYield', 0)*100, 2)}%" if info.get("dividendYield") else "N/A"
+            f"{round(info.get('dividendYield', 0) * 100, 2)}%" if info.get("dividendYield") else "N/A")
+
         )
         fifty_two_week_low = round(info.get("fiftyTwoWeekLow", 0), 2)
         fifty_two_week_high = round(info.get("fiftyTwoWeekHigh", 0), 2)
