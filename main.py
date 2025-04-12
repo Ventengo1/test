@@ -2,6 +2,8 @@ import yfinance as yf
 import re
 import streamlit as st
 from datetime import datetime, timedelta
+from yahoo_fin import stock_info as si
+import feedparser
 
 # --- Keyword sets ---
 very_positive_keywords = {
@@ -90,25 +92,21 @@ ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA)", "").upper
 
 if ticker:
     try:
-        stock = yf.Ticker(ticker)
-        news = stock.news
-
+        # Fetch the RSS feed for the stock
+        feed = si.get_news(ticker)
+        
         # --- Filter news from the last 14 days and limit to a max of 25 articles ---
         fourteen_days_ago = datetime.now() - timedelta(days=14)
         filtered_news = []
-        for item in news:
-            pub_date_str = item.get("pubDate", None)
+        
+        for item in feed:
+            pub_date_str = item.get("published", None)
             if pub_date_str:
                 try:
-                    # Try parsing the date, handle various formats
+                    # Parse the publication date
                     pub_date = datetime.strptime(pub_date_str, "%a, %d %b %Y %H:%M:%S %Z")
                 except ValueError:
-                    # If parsing fails, attempt another format
-                    try:
-                        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%dT%H:%M:%S%z")
-                    except ValueError:
-                        # Handle unexpected date formats here
-                        pub_date = None
+                    pub_date = None
 
                 if pub_date and pub_date >= fourteen_days_ago:
                     filtered_news.append(item)
@@ -130,10 +128,8 @@ if ticker:
             scored_headlines = []
 
             for item in filtered_news:
-                content = item.get("content", item)
-                title = content.get("title", "No Title Found")
-                link_data = content.get("canonicalUrl") or content.get("clickThroughUrl")
-                link = link_data["url"] if isinstance(link_data, dict) and "url" in link_data else "No Link Found"
+                title = item.get("title", "No Title Found")
+                link = item.get("link", "No Link Found")
 
                 sentiment, score, pos, neg = get_sentiment_weighted(title)
                 sentiment_counts[sentiment] += 1
