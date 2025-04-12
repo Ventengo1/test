@@ -200,7 +200,7 @@ if ticker:
                     <b>Sector:</b> {info.get("sector", "N/A")}<br>
                     <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
                     <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0), 2) if info.get("dividendYield") else "N/A"}%<br>
+                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0), 3) if info.get("dividendYield") else "N/A"}%<br>
                     <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
                 </div>
             """, unsafe_allow_html=True)
