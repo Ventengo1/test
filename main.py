@@ -196,7 +196,7 @@ if ticker:
         try:
             info = yf.Ticker(ticker).info
             st.markdown(f"""
-                <div style='background-color:white; padding: 20px; border-radius: 10px;'>
+                <div style='background-color:white; padding: 20px; border-radius: 10px; color: black;'>
                     <b>Sector:</b> {info.get("sector", "N/A")}<br>
                     <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
                     <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
