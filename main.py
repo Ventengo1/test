@@ -2,8 +2,6 @@ import yfinance as yf
 import re
 import streamlit as st
 from datetime import datetime, timedelta
-from yahoo_fin import stock_info as si
-import feedparser
 
 # --- Keyword sets ---
 very_positive_keywords = {
@@ -92,14 +90,14 @@ ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA)", "").upper
 
 if ticker:
     try:
-        # Fetch the RSS feed for the stock
-        feed = si.get_news(ticker)
-        
+        stock = yf.Ticker(ticker)
+        news = stock.news
+
         # --- Filter news from the last 14 days and limit to a max of 25 articles ---
         fourteen_days_ago = datetime.now() - timedelta(days=14)
         filtered_news = []
         
-        for item in feed:
+        for item in news:
             pub_date_str = item.get("published", None)
             if pub_date_str:
                 try:
