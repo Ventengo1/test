@@ -1,9 +1,9 @@
+import re
 import streamlit as st
 import requests
-import re
 from datetime import datetime, timedelta
 
-# Google Custom Search config
+# --- Configurations ---
 API_KEY = "AIzaSyDvdx1ZVxkDsUCYUAIm7XkZBqgOzdf-6dY"
 CSE_ID = "d4b7bac4f507f4b84"
 
@@ -59,8 +59,8 @@ def get_sentiment_weighted(text):
 
     return sentiment, score, pos_count, neg_count
 
-# --- Google CSE search ---
-def search_stock_news_google(stock_symbol, max_results=25, days_back=14):
+# --- Google CSE Search Function ---
+def search_stock_news_google(stock_symbol, max_results=25):
     query = f"{stock_symbol} stock"
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
@@ -68,12 +68,11 @@ def search_stock_news_google(stock_symbol, max_results=25, days_back=14):
         "cx": CSE_ID,
         "q": query,
         "num": 10,
+        "dateRestrict": "d14"  # Last 14 days
     }
 
     all_results = []
     start_index = 1
-    end_date = datetime.utcnow()
-    start_date = end_date - timedelta(days=days_back)
 
     while len(all_results) < max_results:
         params["start"] = start_index
@@ -87,16 +86,6 @@ def search_stock_news_google(stock_symbol, max_results=25, days_back=14):
             title = item.get("title", "")
             link = item.get("link", "")
             snippet = item.get("snippet", "")
-            pub_date = item.get("pagemap", {}).get("metatags", [{}])[0].get("article:published_time", "")
-
-            # Date filtering
-            try:
-                if pub_date:
-                    date_obj = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
-                    if not (start_date <= date_obj <= end_date):
-                        continue
-            except Exception:
-                pass  # Keep if no valid date
 
             all_results.append({
                 "title": title,
@@ -112,16 +101,16 @@ def search_stock_news_google(stock_symbol, max_results=25, days_back=14):
     return all_results
 
 # --- Streamlit UI ---
-st.title("🔍 Google Stock News Sentiment Analyzer")
-st.subheader("Using Google Custom Search + AI Sentiment")
+st.title("📈 Stock News Sentiment Analyzer")
+st.subheader("Analyze recent news headlines for stock sentiment")
 
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA)", "").upper()
 
 if ticker:
     with st.spinner("Fetching news..."):
-        headlines = search_stock_news_google(ticker)
+        articles = search_stock_news_google(ticker, max_results=25)
 
-    if headlines:
+    if articles:
         sentiment_counts = {
             "Very Positive": 0,
             "Positive": 0,
@@ -130,19 +119,24 @@ if ticker:
             "Very Negative": 0
         }
         total_score = 0
-        scored_headlines = []
+        scored_articles = []
 
-        for article in headlines:
-            sentiment, score, pos, neg = get_sentiment_weighted(article['title'])
+        for article in articles:
+            title = article["title"]
+            link = article["link"]
+            snippet = article["snippet"]
+            sentiment, score, pos, neg = get_sentiment_weighted(title)
             sentiment_counts[sentiment] += 1
             total_score += score
-            scored_headlines.append({
-                "title": article['title'],
-                "link": article['link'],
+
+            scored_articles.append({
                 "sentiment": sentiment,
+                "title": title,
                 "score": score,
                 "pos": pos,
-                "neg": neg
+                "neg": neg,
+                "link": link,
+                "snippet": snippet
             })
 
         st.markdown("---")
@@ -150,7 +144,7 @@ if ticker:
         for sentiment_type, count in sentiment_counts.items():
             st.write(f"{sentiment_type}: {count}")
 
-        average_score = total_score / len(scored_headlines)
+        average_score = total_score / len(scored_articles) if scored_articles else 0
         if average_score >= 3:
             overall = "Very Positive"
         elif average_score > 0:
@@ -164,15 +158,14 @@ if ticker:
 
         st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
 
-        # Headlines
         st.markdown("---")
         st.subheader("📰 Headlines")
-
-        for item in scored_headlines:
+        for item in scored_articles:
             with st.expander(f"[{item['sentiment']}] {item['title']}"):
+                st.write(f"**Snippet:** {item['snippet']}")
                 st.write(f"**Score:** {item['score']}")
                 st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
                 st.write(f"[Read Article]({item['link']})")
 
     else:
-        st.warning("No news found in the last 14 days.")
+        st.warning("No news articles found in the last 14 days.")
