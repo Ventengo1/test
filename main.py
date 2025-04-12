@@ -1,4 +1,4 @@
-import re
+import re 
 import streamlit as st
 import requests
 import yfinance as yf
@@ -101,12 +101,24 @@ sentiment_colors = {
 }
 
 # --- App UI ---
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Stock Sentiment Analyzer", page_icon="📈")
 
 st.markdown("""
-    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
-        <h2>📈 Stock Sentiment Analyzer</h2>
-        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
+    <style>
+        body {
+            background-color: #f9f9f9;
+            font-family: "Segoe UI", sans-serif;
+        }
+        .block-container {
+            padding: 2rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+    <div style='background: linear-gradient(to right, #f8f9fa, #e3e3e3); padding: 1.5rem; border-radius: 10px; text-align: center; color: #222;'>
+        <h2 style='color:#111;'>📈 Stock Sentiment Analyzer</h2>
+        <p style='font-size: 18px;'>Analyze stock headlines, news sentiment, and trends at a glance</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -196,11 +208,11 @@ if ticker:
         try:
             info = yf.Ticker(ticker).info
             st.markdown(f"""
-                <div style='background-color:white; padding: 20px; border-radius: 12px; color: black;'>
+                <div style='background-color:white; padding: 20px; border-radius: 10px; color: black;'>
                     <b>Sector:</b> {info.get("sector", "N/A")}<br>
                     <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
                     <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0), 2) if info.get("dividendYield") else "N/A"}%<br>
+                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0) * 100, 2) if info.get("dividendYield") else "N/A"}%<br>
                     <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
                 </div>
             """, unsafe_allow_html=True)
