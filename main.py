@@ -2,7 +2,6 @@ import re
 import streamlit as st
 import requests
 import yfinance as yf
-import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 # --- Configurations ---
