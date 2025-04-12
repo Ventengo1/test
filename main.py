@@ -105,30 +105,34 @@ st.set_page_config(layout="wide")
 
 st.markdown("""
     <style>
-    body {
-        background-color: #f7f9fb;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+    html, body, [class*="css"]  {
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f7fa;
+        color: #222;
     }
     .card {
-        background-color: #eef2f7;
+        background-color: #eaf0f7;
         padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
     }
     .sentiment-box {
-        padding: 10px;
-        border-radius: 8px;
-        margin: 8px 0;
+        padding: 12px;
+        border-radius: 10px;
+        margin: 10px 0;
     }
     h2, h3, h4 {
-        color: #222;
+        color: #111;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # --- Title ---
 st.markdown("""
-    <div class="card" style='text-align: center; background: linear-gradient(to right, #e0ecff, #d9f7f1);'>
+    <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
         <h2>📊 Stock Sentiment Analyzer</h2>
         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
