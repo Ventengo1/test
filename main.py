@@ -1,6 +1,8 @@
 import re
 import streamlit as st
 import requests
+import yfinance as yf
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 # --- Configurations ---
@@ -68,7 +70,7 @@ def search_stock_news_google(stock_symbol, max_results=25):
         "cx": CSE_ID,
         "q": query,
         "num": 10,
-        "dateRestrict": "d14"  # Last 14 days
+        "dateRestrict": "d14"
     }
 
     all_results = []
@@ -87,11 +89,12 @@ def search_stock_news_google(stock_symbol, max_results=25):
             link = item.get("link", "")
             snippet = item.get("snippet", "")
 
-            all_results.append({
-                "title": title,
-                "link": link,
-                "snippet": snippet
-            })
+            if "stock" in snippet.lower() or "news" in snippet.lower():  # Filter non-news
+                all_results.append({
+                    "title": title,
+                    "link": link,
+                    "snippet": snippet
+                })
 
             if len(all_results) >= max_results:
                 break
@@ -101,71 +104,89 @@ def search_stock_news_google(stock_symbol, max_results=25):
     return all_results
 
 # --- Streamlit UI ---
+st.set_page_config(layout="wide")
 st.title("📈 Stock News Sentiment Analyzer")
 st.subheader("Analyze recent news headlines for stock sentiment")
 
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA)", "").upper()
 
 if ticker:
-    with st.spinner("Fetching news..."):
-        articles = search_stock_news_google(ticker, max_results=25)
+    col1, col2 = st.columns([2, 1])  # Left: articles, Right: chart
 
-    if articles:
-        sentiment_counts = {
-            "Very Positive": 0,
-            "Positive": 0,
-            "Neutral": 0,
-            "Negative": 0,
-            "Very Negative": 0
-        }
-        total_score = 0
-        scored_articles = []
+    with col1:
+        with st.spinner("Fetching news..."):
+            articles = search_stock_news_google(ticker, max_results=25)
 
-        for article in articles:
-            title = article["title"]
-            link = article["link"]
-            snippet = article["snippet"]
-            sentiment, score, pos, neg = get_sentiment_weighted(title)
-            sentiment_counts[sentiment] += 1
-            total_score += score
+        if articles:
+            sentiment_counts = {
+                "Very Positive": 0,
+                "Positive": 0,
+                "Neutral": 0,
+                "Negative": 0,
+                "Very Negative": 0
+            }
+            total_score = 0
+            scored_articles = []
 
-            scored_articles.append({
-                "sentiment": sentiment,
-                "title": title,
-                "score": score,
-                "pos": pos,
-                "neg": neg,
-                "link": link,
-                "snippet": snippet
-            })
+            for article in articles:
+                title = article["title"]
+                link = article["link"]
+                snippet = article["snippet"]
+                sentiment, score, pos, neg = get_sentiment_weighted(title)
+                sentiment_counts[sentiment] += 1
+                total_score += score
 
-        st.markdown("---")
-        st.subheader("🧾 Sentiment Summary")
-        for sentiment_type, count in sentiment_counts.items():
-            st.write(f"{sentiment_type}: {count}")
+                scored_articles.append({
+                    "sentiment": sentiment,
+                    "title": title,
+                    "score": score,
+                    "pos": pos,
+                    "neg": neg,
+                    "link": link,
+                    "snippet": snippet
+                })
 
-        average_score = total_score / len(scored_articles) if scored_articles else 0
-        if average_score >= 3:
-            overall = "Very Positive"
-        elif average_score > 0:
-            overall = "Positive"
-        elif average_score == 0:
-            overall = "Neutral"
-        elif average_score <= -3:
-            overall = "Very Negative"
+            st.markdown("---")
+            st.subheader("🧾 Sentiment Summary")
+            for sentiment_type, count in sentiment_counts.items():
+                st.write(f"{sentiment_type}: {count}")
+
+            average_score = total_score / len(scored_articles) if scored_articles else 0
+            if average_score >= 3:
+                overall = "Very Positive"
+            elif average_score > 0:
+                overall = "Positive"
+            elif average_score == 0:
+                overall = "Neutral"
+            elif average_score <= -3:
+                overall = "Very Negative"
+            else:
+                overall = "Negative"
+
+            st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
+
+            st.markdown("---")
+            st.subheader("📰 Headlines")
+            for item in scored_articles:
+                with st.expander(f"[{item['sentiment']}] {item['title']}"):
+                    st.write(f"**Snippet:** {item['snippet']}")
+                    st.write(f"**Score:** {item['score']}")
+                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
+                    st.write(f"[Read Article]({item['link']})")
+
         else:
-            overall = "Negative"
+            st.warning("No news articles found in the last 14 days.")
 
-        st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
-
-        st.markdown("---")
-        st.subheader("📰 Headlines")
-        for item in scored_articles:
-            with st.expander(f"[{item['sentiment']}] {item['title']}"):
-                st.write(f"**Snippet:** {item['snippet']}")
-                st.write(f"**Score:** {item['score']}")
-                st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
-                st.write(f"[Read Article]({item['link']})")
-
-    else:
-        st.warning("No news articles found in the last 14 days.")
+    # --- Stock Chart in col2 ---
+    with col2:
+        st.subheader(f"{ticker} - 30 Day Price Chart")
+        try:
+            end = datetime.today()
+            start = end - timedelta(days=30)
+            stock_data = yf.download(ticker, start=start, end=end)
+            if not stock_data.empty:
+                st.line_chart(stock_data["Close"])
+            else:
+                st.info("No stock price data found.")
+        except Exception as e:
+            st.error(f"Error loading chart: {e}")
