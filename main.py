@@ -20,7 +20,7 @@ positive_keywords = {
 
 negative_keywords = {
     "loss", "fall", "drop", "decline", "miss", "cut", "downgrade", "bearish", "warn", "plunge", "weak", "down",
-    "decrease", "layoff", "negative", "recall", "lawsuit", "crash", "hurt", "tariffs", "prices", "price", "missed", "bad", "plummeting"
+    "decrease", "layoff", "negative", "recall", "lawsuit", "crash", "hurt", "tariffs", "price down", "missed", "bad", "plummeting"
 }
 
 very_negative_keywords = {
