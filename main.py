@@ -1,4 +1,4 @@
-import re
+import re 
 import streamlit as st
 import requests
 import yfinance as yf
@@ -179,36 +179,34 @@ if ticker:
         else:
             st.warning("No news articles found in the last 14 days.")
 
-   with col2:
-    st.markdown("### 📉 30-Day Stock Chart")
-    try:
-        end_date = datetime.today()
-        start_date = end_date - timedelta(days=30)
-        data = yf.download(ticker, start=start_date, end=end_date)
-        if not data.empty:
-            st.line_chart(data["Close"])
-        else:
-            st.info("No chart data available.")
-    except Exception as e:
-        st.error(f"Chart error: {e}")
+    with col2:
+        st.markdown("### 📉 30-Day Stock Chart")
+        try:
+            end_date = datetime.today()
+            start_date = end_date - timedelta(days=30)
+            data = yf.download(ticker, start=start_date, end=end_date)
+            if not data.empty:
+                st.line_chart(data["Close"])
+            else:
+                st.info("No chart data available.")
+        except Exception as e:
+            st.error(f"Chart error: {e}")
 
-    st.markdown("### 🧾 Company Overview")
+        st.markdown("### 🧾 Company Overview")
+        try:
+            stock = yf.Ticker(ticker)
+            info = stock.info
 
-    try:
-        stock = yf.Ticker(ticker)
-        info = stock.info
+            st.markdown(f"""
+            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #ccc;'>
+                <b>Company:</b> {info.get("longName", "N/A")}<br>
+                <b>Sector:</b> {info.get("sector", "N/A")}<br>
+                <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
+                <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
+                <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100, 2) if info.get("dividendYield") else "N/A"}%<br>
+                <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}<br>
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div style='background-color: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #ccc;'>
-            <b>Company:</b> {info.get("longName", "N/A")}<br>
-            <b>Sector:</b> {info.get("sector", "N/A")}<br>
-            <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
-            <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-            <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100, 2) if info.get("dividendYield") else "N/A"}%<br>
-            <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}<br>
-        </div>
-        """, unsafe_allow_html=True)
-
-    except Exception as e:
-        st.error("Unable to load company overview.")
-
+        except Exception as e:
+            st.error("Unable to load company overview.")
