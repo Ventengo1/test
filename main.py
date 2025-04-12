@@ -1,6 +1,7 @@
 import yfinance as yf
 import re
 import streamlit as st
+from datetime import datetime, timedelta
 
 # --- Keyword sets ---
 very_positive_keywords = {
@@ -70,16 +71,16 @@ def get_weighted_overall_sentiment(headlines):
 
     average_weighted_score = total_weighted_score / total_weight
 
-    if average_weighted_score >= 5:
+    if average_weighted_score >= 3:
         return "Very Positive"
-    elif average_weighted_score >= 2:
+    elif average_weighted_score > 0:
         return "Positive"
-    elif average_weighted_score <= -2:
-        return "Negative"
-    elif average_weighted_score <= -5:
+    elif average_weighted_score == 0:
+        return "Neutral"
+    elif average_weighted_score <= -3:
         return "Very Negative"
     else:
-        return "Neutral"
+        return "Negative"
 
 # --- Streamlit UI ---
 st.title("📈 Stock News Sentiment Analyzer")
@@ -91,8 +92,22 @@ if ticker:
     try:
         stock = yf.Ticker(ticker)
         news = stock.news
-        if news:
-            st.success(f"Fetched {len(news)} news headlines for {ticker}")
+
+        # --- Filter news from the last 14 days and limit to a max of 25 articles ---
+        fourteen_days_ago = datetime.now() - timedelta(days=14)
+        filtered_news = []
+        for item in news:
+            pub_date = item.get("pubDate")
+            if pub_date:
+                # Convert pub_date to datetime
+                pub_date = datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %Z")
+                if pub_date >= fourteen_days_ago:
+                    filtered_news.append(item)
+            if len(filtered_news) >= 25:
+                break
+
+        if filtered_news:
+            st.success(f"Fetched {len(filtered_news)} news headlines for {ticker}")
             sentiment_counts = {
                 "Very Positive": 0,
                 "Positive": 0,
@@ -104,7 +119,7 @@ if ticker:
             headline_count = 0
             scored_headlines = []
 
-            for item in news:
+            for item in filtered_news:
                 content = item.get("content", item)
                 title = content.get("title", "No Title Found")
                 link_data = content.get("canonicalUrl") or content.get("clickThroughUrl")
@@ -159,6 +174,6 @@ if ticker:
                     st.write(f"[Read Article]({item['link']})")
 
         else:
-            st.warning("No news found for this ticker.")
+            st.warning("No recent news found for this ticker over the past 14 days.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
