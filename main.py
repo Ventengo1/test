@@ -90,12 +90,21 @@ def search_stock_news_google(stock_symbol, max_results=25):
 
     return all_results
 
-# --- Styling and Layout ---
+# --- Sentiment Color Definitions ---
+sentiment_colors = {
+    "Very Positive": "#27ae60",
+    "Positive": "#2ecc71",
+    "Neutral": "#95a5a6",
+    "Negative": "#e74c3c",
+    "Very Negative": "#c0392b"
+}
+
+# --- App UI ---
 st.set_page_config(page_title="Stock Sentiment Analyzer", layout="wide")
 
 # --- Header Section ---
 st.markdown("""
-    <div style='background: linear-gradient(to right, #00aaff, #1e3c72); padding: 2rem; border-radius: 10px; text-align: center; color: white;'>
+    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 2rem; border-radius: 10px; text-align: center; color: white;'>
         <h1>📈 Stock Sentiment Analyzer</h1>
         <p style='font-size: 18px;'>Analyze the sentiment of recent stock news and view the latest trends and insights.</p>
     </div>
@@ -119,7 +128,7 @@ if ticker:
             articles = search_stock_news_google(ticker, max_results=25)
 
         if articles:
-            sentiment_counts = {s: 0 for s in ["Very Positive", "Positive", "Neutral", "Negative", "Very Negative"]}
+            sentiment_counts = {s: 0 for s in sentiment_colors}
             total_score = 0
             scored_articles = []
 
@@ -144,16 +153,23 @@ if ticker:
             # --- Display Sentiment Summary ---
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
-                st.write(f"{sentiment}: {count}")
+                color = sentiment_colors[sentiment]
+                st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
 
             # --- Display Articles ---
             st.markdown("### 📰 Headlines")
             for item in scored_articles:
-                with st.expander(f"[{item['sentiment']}] {item['title']}"):
-                    st.write(f"**Snippet:** {item['snippet']}")
-                    st.write(f"**Score:** {item['score']}")
-                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
-                    st.write(f"[Read Article]({item['link']})")
+                color = sentiment_colors[item['sentiment']]
+                with st.container():
+                    st.markdown(f"""
+                        <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
+                            <h5 style='color: {color};'>{item['sentiment']}</h5>
+                            <b>{item['title']}</b><br>
+                            <i>{item['snippet']}</i><br>
+                            <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
+                            <a href="{item['link']}" target="_blank">🔗 Read More</a>
+                        </div>
+                    """, unsafe_allow_html=True)
 
         else:
             st.warning("No news articles found in the last 14 days.")
