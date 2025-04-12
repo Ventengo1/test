@@ -118,9 +118,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-    <div style='background: linear-gradient(to right, #e0eafc, #cfdef3); padding: 1.5rem; border-radius: 10px; text-align: center; color: black;'>
-        <h2>📈 Stock Sentiment Analyzer</h2>
-        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
+    <div style='background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 10px; text-align: center; color: #000000;'>
+        <h2 style='margin-bottom: 0;'>📈 Stock Sentiment Analyzer</h2>
+        <p style='margin-top: 5px; color: #555;'>News + Sentiment + Charts in one dashboard</p>
     </div>
 """, unsafe_allow_html=True)
 
