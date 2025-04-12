@@ -1,7 +1,11 @@
-import yfinance as yf
-import re
 import streamlit as st
+import requests
+import re
 from datetime import datetime, timedelta
+
+# Google Custom Search config
+API_KEY = "AIzaSyDvdx1ZVxkDsUCYUAIm7XkZBqgOzdf-6dY"
+CSE_ID = "d4b7bac4f507f4b84"
 
 # --- Keyword sets ---
 very_positive_keywords = {
@@ -55,129 +59,120 @@ def get_sentiment_weighted(text):
 
     return sentiment, score, pos_count, neg_count
 
-# --- Weighted Overall Sentiment ---
-def get_weighted_overall_sentiment(headlines):
-    total_weighted_score = 0
-    total_weight = 0
+# --- Google CSE search ---
+def search_stock_news_google(stock_symbol, max_results=25, days_back=14):
+    query = f"{stock_symbol} stock"
+    url = "https://www.googleapis.com/customsearch/v1"
+    params = {
+        "key": API_KEY,
+        "cx": CSE_ID,
+        "q": query,
+        "num": 10,
+    }
 
-    for item in headlines:
-        score = item['score']
-        weight = max(1, abs(score))  # More extreme = more weight
-        total_weighted_score += score * weight
-        total_weight += weight
+    all_results = []
+    start_index = 1
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=days_back)
 
-    if total_weight == 0:
-        return "Neutral"
+    while len(all_results) < max_results:
+        params["start"] = start_index
+        response = requests.get(url, params=params)
+        data = response.json()
 
-    average_weighted_score = total_weighted_score / total_weight
+        if "items" not in data:
+            break
 
-    if average_weighted_score >= 3:
-        return "Very Positive"
-    elif average_weighted_score > 0:
-        return "Positive"
-    elif average_weighted_score == 0:
-        return "Neutral"
-    elif average_weighted_score <= -3:
-        return "Very Negative"
-    else:
-        return "Negative"
+        for item in data["items"]:
+            title = item.get("title", "")
+            link = item.get("link", "")
+            snippet = item.get("snippet", "")
+            pub_date = item.get("pagemap", {}).get("metatags", [{}])[0].get("article:published_time", "")
+
+            # Date filtering
+            try:
+                if pub_date:
+                    date_obj = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
+                    if not (start_date <= date_obj <= end_date):
+                        continue
+            except Exception:
+                pass  # Keep if no valid date
+
+            all_results.append({
+                "title": title,
+                "link": link,
+                "snippet": snippet
+            })
+
+            if len(all_results) >= max_results:
+                break
+
+        start_index += 10
+
+    return all_results
 
 # --- Streamlit UI ---
-st.title("📈 Stock News Sentiment Analyzer")
-st.subheader("Analyze recent news headlines for stock sentiment")
+st.title("🔍 Google Stock News Sentiment Analyzer")
+st.subheader("Using Google Custom Search + AI Sentiment")
 
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA)", "").upper()
 
 if ticker:
-    try:
-        stock = yf.Ticker(ticker)
-        news = stock.news
+    with st.spinner("Fetching news..."):
+        headlines = search_stock_news_google(ticker)
 
-        # --- Filter news from the last 14 days and limit to a max of 25 articles ---
-        fourteen_days_ago = datetime.now() - timedelta(days=14)
-        filtered_news = []
-        
-        for item in news:
-            pub_date_str = item.get("published", None)
-            if pub_date_str:
-                try:
-                    # Parse the publication date
-                    pub_date = datetime.strptime(pub_date_str, "%a, %d %b %Y %H:%M:%S %Z")
-                except ValueError:
-                    pub_date = None
+    if headlines:
+        sentiment_counts = {
+            "Very Positive": 0,
+            "Positive": 0,
+            "Neutral": 0,
+            "Negative": 0,
+            "Very Negative": 0
+        }
+        total_score = 0
+        scored_headlines = []
 
-                if pub_date and pub_date >= fourteen_days_ago:
-                    filtered_news.append(item)
-            
-            if len(filtered_news) >= 25:
-                break
+        for article in headlines:
+            sentiment, score, pos, neg = get_sentiment_weighted(article['title'])
+            sentiment_counts[sentiment] += 1
+            total_score += score
+            scored_headlines.append({
+                "title": article['title'],
+                "link": article['link'],
+                "sentiment": sentiment,
+                "score": score,
+                "pos": pos,
+                "neg": neg
+            })
 
-        if filtered_news:
-            st.success(f"Fetched {len(filtered_news)} news headlines for {ticker}")
-            sentiment_counts = {
-                "Very Positive": 0,
-                "Positive": 0,
-                "Neutral": 0,
-                "Negative": 0,
-                "Very Negative": 0
-            }
-            total_score = 0
-            headline_count = 0
-            scored_headlines = []
+        st.markdown("---")
+        st.subheader("🧾 Sentiment Summary")
+        for sentiment_type, count in sentiment_counts.items():
+            st.write(f"{sentiment_type}: {count}")
 
-            for item in filtered_news:
-                title = item.get("title", "No Title Found")
-                link = item.get("link", "No Link Found")
-
-                sentiment, score, pos, neg = get_sentiment_weighted(title)
-                sentiment_counts[sentiment] += 1
-                total_score += score
-                headline_count += 1
-
-                scored_headlines.append({
-                    "sentiment": sentiment,
-                    "title": title,
-                    "score": score,
-                    "pos": pos,
-                    "neg": neg,
-                    "link": link
-                })
-
-            # --- Summary section FIRST ---
-            st.markdown("---")
-            st.subheader("🧾 Sentiment Summary")
-            for sentiment_type, count in sentiment_counts.items():
-                st.write(f"{sentiment_type}: {count}")
-
-            average_score = total_score / headline_count if headline_count else 0
-            if average_score >= 3:
-                overall = "Very Positive"
-            elif average_score > 0:
-                overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
-                overall = "Very Negative"
-            else:
-                overall = "Negative"
-
-            st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
-
-            # --- Weighted Overall Sentiment ---
-            weighted_overall = get_weighted_overall_sentiment(scored_headlines)
-            st.markdown(f"**🧠 Weighted Sentiment (Strength-Based):** {weighted_overall}")
-
-            # --- Then show the headlines ---
-            st.markdown("---")
-            st.subheader("📰 Headlines")
-
-            for item in scored_headlines:
-                with st.expander(f"[{item['sentiment']}] {item['title']}"):
-                    st.write(f"**Score:** {item['score']}")
-                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
-                    st.write(f"[Read Article]({item['link']})")
-
+        average_score = total_score / len(scored_headlines)
+        if average_score >= 3:
+            overall = "Very Positive"
+        elif average_score > 0:
+            overall = "Positive"
+        elif average_score == 0:
+            overall = "Neutral"
+        elif average_score <= -3:
+            overall = "Very Negative"
         else:
-            st.warning("No recent news found for this ticker over the past 14 days.")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+            overall = "Negative"
+
+        st.markdown(f"### 📊 Overall Sentiment for **{ticker}**: {overall}")
+
+        # Headlines
+        st.markdown("---")
+        st.subheader("📰 Headlines")
+
+        for item in scored_headlines:
+            with st.expander(f"[{item['sentiment']}] {item['title']}"):
+                st.write(f"**Score:** {item['score']}")
+                st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
+                st.write(f"[Read Article]({item['link']})")
+
+    else:
+        st.warning("No news found in the last 14 days.")
