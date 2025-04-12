@@ -2,7 +2,6 @@ import re
 import streamlit as st
 import requests
 import yfinance as yf
-import pandas as pd
 from datetime import datetime, timedelta
 
 # --- Configurations ---
@@ -91,94 +90,36 @@ def search_stock_news_google(stock_symbol, max_results=25):
 
     return all_results
 
-# --- Custom CSS for Font + Styling ---
-st.set_page_config(layout="wide", page_title="Stock Sentiment Analyzer")
+# --- Styling and Layout ---
+st.set_page_config(page_title="Stock Sentiment Analyzer", layout="wide")
 
+# --- Header Section ---
 st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-        background-color: #f9f9f9;
-    }
-
-    .stTextInput>div>div>input {
-        font-size: 1rem;
-        padding: 0.7rem;
-        border-radius: 8px;
-        border: 2px solid #ddd;
-    }
-
-    .input-box {
-        background-color: #ffffff;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
-    }
-
-    .hero-banner {
-        background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    .hero-banner h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    .hero-banner p {
-        font-size: 1.3rem;
-        opacity: 0.8;
-    }
-
-    .sidebar-header {
-        font-size: 1.3rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        color: #333;
-    }
-
-    .company-box {
-        background-color: #ffffff;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-    }
-    </style>
+    <div style='background: linear-gradient(to right, #00aaff, #1e3c72); padding: 2rem; border-radius: 10px; text-align: center; color: white;'>
+        <h1>📈 Stock Sentiment Analyzer</h1>
+        <p style='font-size: 18px;'>Analyze the sentiment of recent stock news and view the latest trends and insights.</p>
+    </div>
 """, unsafe_allow_html=True)
 
-# --- Hero Banner ---
+# --- Stock Ticker Input with Styling ---
 st.markdown("""
-<div class="hero-banner">
-    <h1>Stock Sentiment Analyzer</h1>
-    <p>Get the latest insights on stock news, trends, and market sentiment in one place.</p>
-</div>
+    <div style='background-color: #2C3E50; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>
+        <h3 style='color: white; text-align: center;'>Enter Stock Ticker Symbol</h3>
+    </div>
 """, unsafe_allow_html=True)
 
-# --- Input Box ---
-with st.container():
-    st.markdown('<div class="input-box">', unsafe_allow_html=True)
-    ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
-    st.markdown('</div>', unsafe_allow_html=True)
+ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "", key="ticker_input", placeholder="Stock Symbol")
 
-# --- Stock Data and Sentiment Display ---
+# --- Check if Ticker is Provided ---
 if ticker:
     col1, col2 = st.columns([2.5, 1.5])
 
     with col1:
-        with st.spinner("Fetching news and data..."):
+        with st.spinner("🔍 Fetching news..."):
             articles = search_stock_news_google(ticker, max_results=25)
 
         if articles:
-            sentiment_counts = {s: 0 for s in sentiment_colors}
+            sentiment_counts = {s: 0 for s in ["Very Positive", "Positive", "Neutral", "Negative", "Very Negative"]}
             total_score = 0
             scored_articles = []
 
@@ -200,45 +141,26 @@ if ticker:
                     "snippet": snippet
                 })
 
-            average_score = total_score / len(scored_articles)
-            if average_score >= 3:
-                overall = "Very Positive"
-            elif average_score > 0:
-                overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
-                overall = "Very Negative"
-            else:
-                overall = "Negative"
-
-            st.markdown("### Sentiment Summary")
+            # --- Display Sentiment Summary ---
+            st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
-                color = sentiment_colors[sentiment]
-                st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
+                st.write(f"{sentiment}: {count}")
 
-            st.markdown(f"### Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
-            st.markdown("---")
-            st.markdown("### News Headlines")
-
+            # --- Display Articles ---
+            st.markdown("### 📰 Headlines")
             for item in scored_articles:
-                color = sentiment_colors[item['sentiment']]
-                with st.container():
-                    st.markdown(f"""
-                        <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
-                            <h5 style='color: {color};'>{item['sentiment']}</h5>
-                            <b>{item['title']}</b><br>
-                            <i>{item['snippet']}</i><br>
-                            <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
-                            <a href="{item['link']}" target="_blank">Read More</a>
-                        </div>
-                    """, unsafe_allow_html=True)
+                with st.expander(f"[{item['sentiment']}] {item['title']}"):
+                    st.write(f"**Snippet:** {item['snippet']}")
+                    st.write(f"**Score:** {item['score']}")
+                    st.write(f"**Positive hits:** {item['pos']} | **Negative hits:** {item['neg']}")
+                    st.write(f"[Read Article]({item['link']})")
 
         else:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        st.markdown("### 30-Day Stock Chart")
+        # --- 30-Day Stock Chart ---
+        st.markdown("### 📉 30-Day Stock Chart")
         try:
             end_date = datetime.today()
             start_date = end_date - timedelta(days=30)
@@ -249,19 +171,10 @@ if ticker:
                 st.info("No chart data available.")
         except Exception as e:
             st.error(f"Chart error: {e}")
-
-        # Company Overview Section
-        st.markdown("### Company Overview")
-        try:
-            stock_info = yf.Ticker(ticker).info
-            st.markdown(f"""
-                <div class="company-box">
-                    <b>Sector:</b> {stock_info.get("sector", "N/A")}<br>
-                    <b>Market Cap:</b> ${round(stock_info.get("marketCap", 0) / 1e9, 2)}B<br>
-                    <b>P/E Ratio:</b> {stock_info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(stock_info.get("dividendYield", 0) * 100, 2) if stock_info.get("dividendYield") else "N/A"}%<br>
-                    <b>52-Week Range:</b> ${stock_info.get("fiftyTwoWeekLow", "N/A")} - ${stock_info.get("fiftyTwoWeekHigh", "N/A")}
-                </div>
-            """, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Company data error: {e}")
+    
+else:
+    st.markdown("""
+        <div style='background-color: #ecf0f1; padding: 1rem; border-radius: 8px; text-align: center;'>
+            <p style='color: #34495e;'>Please enter a stock ticker symbol to get started.</p>
+        </div>
+    """, unsafe_allow_html=True)
