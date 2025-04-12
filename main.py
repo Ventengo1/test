@@ -10,7 +10,7 @@ CSE_ID = "d4b7bac4f507f4b84"
 
 # --- Keyword sets ---
 very_positive_keywords = {
-    "skyrocket", "blockbuster", "blowout", "explode", "unprecedented", "all-time high", "record-breaking", "soars", "soar"
+    "skyrocket", "skyrocketing", "blockbuster", "blowout", "explode", "unprecedented", "all-time high", "record-breaking", "soars", "soar"
 }
 
 positive_keywords = {
