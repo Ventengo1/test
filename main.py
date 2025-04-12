@@ -2,6 +2,7 @@ import re
 import streamlit as st
 import requests
 import yfinance as yf
+import pandas as pd
 from datetime import datetime, timedelta
 
 # --- Configurations ---
@@ -11,7 +12,7 @@ CSE_ID = "d4b7bac4f507f4b84"
 # --- Sentiment Keywords ---
 very_positive_keywords = {"skyrocket", "blockbuster", "blowout", "explode", "unprecedented", "all-time high", "record-breaking", "soars", "soar"}
 positive_keywords = {"gain", "rise", "rises", "beat", "beats expectations", "surge", "surges", "record", "profit", "strong", "up", "increase", "growth", "positive", "upgrade", "buy", "bullish", "rally", "boost", "opportunity", "leads", "upside", "boosts", "rallied", "outperforms"}
-negative_keywords = {"loss", "fall", "drop", "decline", "miss", "cut", "downgrade", "bearish", "warn", "plunge", "weak", "down", "decrease", "negative", "recall", "lawsuit", "crash", "hurt", "tariffs", "prices", "price", "missed", "bad"}
+negative_keywords = {"loss", "fall", "drop", "decline", "miss", "cut", "downgrade", "bearish", "warn", "plunge", "weak", "down", "decrease", "layoff", "negative", "recall", "lawsuit", "crash", "hurt", "tariffs", "prices", "price", "missed", "bad"}
 very_negative_keywords = {"collapse", "bankruptcy", "scandal", "meltdown", "fraud", "devastating", "catastrophic", "all-time low"}
 
 # --- Sentiment Scoring ---
@@ -90,7 +91,7 @@ def search_stock_news_google(stock_symbol, max_results=25):
 
     return all_results
 
-# --- Sentiment Color Definitions ---
+# --- Custom Badge Colors ---
 sentiment_colors = {
     "Very Positive": "#27ae60",
     "Positive": "#2ecc71",
@@ -100,28 +101,19 @@ sentiment_colors = {
 }
 
 # --- App UI ---
-st.set_page_config(page_title="Stock Sentiment Analyzer", layout="wide")
+st.set_page_config(layout="wide")
 
-# --- Header Section ---
 st.markdown("""
-    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 2rem; border-radius: 10px; text-align: center; color: white;'>
-        <h1>📈 Stock Sentiment Analyzer</h1>
-        <p style='font-size: 18px;'>Analyze the sentiment of recent stock news and view the latest trends and insights.</p>
+    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
+        <h2>📈 Stock Sentiment Analyzer</h2>
+        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
     </div>
 """, unsafe_allow_html=True)
 
-# --- Stock Ticker Input with Styling ---
-st.markdown("""
-    <div style='background-color: #2C3E50; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;'>
-        <h3 style='color: white; text-align: center;'>Enter Stock Ticker Symbol</h3>
-    </div>
-""", unsafe_allow_html=True)
+ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
-ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "", key="ticker_input", placeholder="Stock Symbol")
-
-# --- Check if Ticker is Provided ---
 if ticker:
-    col1, col2 = st.columns([2.5, 1.5])
+    col1, col2 = st.columns([2.3, 1.7])
 
     with col1:
         with st.spinner("🔍 Fetching news..."):
@@ -150,14 +142,27 @@ if ticker:
                     "snippet": snippet
                 })
 
-            # --- Display Sentiment Summary ---
+            average_score = total_score / len(scored_articles)
+            if average_score >= 3:
+                overall = "Very Positive"
+            elif average_score > 0:
+                overall = "Positive"
+            elif average_score == 0:
+                overall = "Neutral"
+            elif average_score <= -3:
+                overall = "Very Negative"
+            else:
+                overall = "Negative"
+
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
                 color = sentiment_colors[sentiment]
                 st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
 
-            # --- Display Articles ---
+            st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
+            st.markdown("---")
             st.markdown("### 📰 Headlines")
+
             for item in scored_articles:
                 color = sentiment_colors[item['sentiment']]
                 with st.container():
@@ -175,7 +180,6 @@ if ticker:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        # --- 30-Day Stock Chart ---
         st.markdown("### 📉 30-Day Stock Chart")
         try:
             end_date = datetime.today()
@@ -187,10 +191,18 @@ if ticker:
                 st.info("No chart data available.")
         except Exception as e:
             st.error(f"Chart error: {e}")
-    
-else:
-    st.markdown("""
-        <div style='background-color: #ecf0f1; padding: 1rem; border-radius: 8px; text-align: center;'>
-            <p style='color: #34495e;'>Please enter a stock ticker symbol to get started.</p>
-        </div>
-    """, unsafe_allow_html=True)
+
+        st.markdown("### 🏢 Company Overview")
+        try:
+            info = yf.Ticker(ticker).info
+            st.markdown(f"""
+                <div style='background-color:white; padding: 20px; border-radius: 10px;'>
+                    <b>Sector:</b> {info.get("sector", "N/A")}<br>
+                    <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
+                    <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
+                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0) * 100, 2) if info.get("dividendYield") else "N/A"}%<br>
+                    <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
+                </div>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Company overview error: {e}")
