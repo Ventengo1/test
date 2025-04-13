@@ -1,4 +1,4 @@
-import re 
+import re
 import streamlit as st
 import requests
 import yfinance as yf
@@ -34,16 +34,16 @@ def get_sentiment_weighted(text):
             score -= 1
             neg_count += 1
 
-    if score >= 10:
+    if score >= 3:
         sentiment = "Very Positive"
-    elif score > 4:
+    elif score > 0:
         sentiment = "Positive"
-    elif score < 4:
-        sentiment = "Negative"
-    elif score <= -10:
+    elif score == 0:
+        sentiment = "Neutral"
+    elif score <= -3:
         sentiment = "Very Negative"
     else:
-        sentiment = "Neutral"
+        sentiment = "Negative"
 
     return sentiment, score, pos_count, neg_count
 
@@ -179,50 +179,15 @@ if ticker:
         else:
             st.warning("No news articles found in the last 14 days.")
 
-with col2:
-    st.markdown("### 📉 30-Day Stock Chart")
-    try:
-        end_date = datetime.today()
-        start_date = end_date - timedelta(days=30)
-        data = yf.download(ticker, start=start_date, end=end_date)
-        if not data.empty:
-            st.line_chart(data["Close"])
-        else:
-            st.info("No chart data available.")
-    except Exception as e:
-        st.error(f"Chart error: {e}")
-
-    # --- Company Overview ---
-    st.markdown("### 🏢 Company Overview")
-    try:
-        ticker_obj = yf.Ticker(ticker)
-        info = ticker_obj.info
-
-        sector = info.get("sector", "N/A")
-        market_cap = round(info.get("marketCap", 0) / 1e9, 2)
-        pe_ratio = info.get("trailingPE", "N/A")
-            dividend_yield = (
-            f"{round(info.get('dividendYield', 0) * 100, 2)}%" if info.get("dividendYield") else "N/A")
-        fifty_two_week_low = round(info.get("fiftyTwoWeekLow", 0), 2)
-        fifty_two_week_high = round(info.get("fiftyTwoWeekHigh", 0), 2)
-
-        st.markdown(f"""
-            <div style="
-                background-color: #ffffff;
-                color: #000000;
-                padding: 1.2rem;
-                border-radius: 10px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                font-size: 1.1rem;
-                line-height: 1.7;
-            ">
-                <b>Sector:</b> {sector}<br>
-                <b>Market Cap:</b> ${market_cap}B<br>
-                <b>P/E Ratio:</b> {pe_ratio}<br>
-                <b>Dividend Yield:</b> {dividend_yield}<br>
-                <b>52-Week Range:</b> ${fifty_two_week_low} - ${fifty_two_week_high}
-            </div>
-        """, unsafe_allow_html=True)
-
-    except Exception as e:
-        st.warning(f"Couldn't load company overview: {e}")
+    with col2:
+        st.markdown("### 📉 30-Day Stock Chart")
+        try:
+            end_date = datetime.today()
+            start_date = end_date - timedelta(days=30)
+            data = yf.download(ticker, start=start_date, end=end_date)
+            if not data.empty:
+                st.line_chart(data["Close"])
+            else:
+                st.info("No chart data available.")
+        except Exception as e:
+            st.error(f"Chart error: {e}")
