@@ -6,8 +6,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # --- Configurations ---
-API_KEY = "AIzaSyAuM7NVH5zlQcRYZh0LB58dUUJGX4qIZB0"
-CSE_ID = "079514f6bfc78415e"
+API_KEY = "AIzaSyATbwRYRrjv5JvCyJfw8pxvM2px6yhC0kg"
+CSE_ID = "42708dbcedbe142d2"
 
 # --- Sentiment Keywords ---
 very_positive_keywords = {"skyrocket", "blockbuster", "blowout", "explode", "unprecedented", "all time high", "record-breaking", "soars", "multiple", "expansion", "soar"}
