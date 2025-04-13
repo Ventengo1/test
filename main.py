@@ -100,19 +100,9 @@ sentiment_colors = {
     "Very Negative": "#c0392b"
 }
 
-# --- Fetch Index Data ---
-def get_index_data(symbol):
-    index = yf.Ticker(symbol)
-    hist = index.history(period="1d")
-    current_price = hist['Close'].iloc[0]
-    change = hist['Close'].iloc[0] - hist['Open'].iloc[0]
-    percentage_change = (change / hist['Open'].iloc[0]) * 100
-    return current_price, change, percentage_change
-
 # --- App UI ---
 st.set_page_config(layout="wide")
 
-# Header Section
 st.markdown("""
     <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
         <h2>📈 Stock Sentiment Analyzer</h2>
@@ -120,105 +110,99 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- Stock Index Widgets on Homepage ---
-st.markdown("### Major Stock Indexes")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    # Dow Jones Industrial Average (DJIA)
-    djia_price, djia_change, djia_pct = get_index_data("^DJI")
-    st.markdown(f"""
-        <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
-            <h3>Dow Jones</h3>
-            <p><strong>Price:</strong> ${djia_price:,.2f}</p>
-            <p><strong>Change:</strong> ${djia_change:,.2f} ({djia_pct:+.2f}%)</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    # NASDAQ Composite
-    nasdaq_price, nasdaq_change, nasdaq_pct = get_index_data("^IXIC")
-    st.markdown(f"""
-        <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
-            <h3>NASDAQ</h3>
-            <p><strong>Price:</strong> ${nasdaq_price:,.2f}</p>
-            <p><strong>Change:</strong> ${nasdaq_change:,.2f} ({nasdaq_pct:+.2f}%)</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    # S&P 500
-    sp500_price, sp500_change, sp500_pct = get_index_data("^GSPC")
-    st.markdown(f"""
-        <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
-            <h3>S&P 500</h3>
-            <p><strong>Price:</strong> ${sp500_price:,.2f}</p>
-            <p><strong>Change:</strong> ${sp500_change:,.2f} ({sp500_pct:+.2f}%)</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-# Enter Stock Ticker Section
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
 if ticker:
-    try:
-        col1, col2 = st.columns([2.3, 1.7])
+    col1, col2 = st.columns([2.3, 1.7])
 
-        with col1:
-            with st.spinner("🔍 Fetching news..."):
-                articles = search_stock_news_google(ticker, max_results=25)
+    with col1:
+        with st.spinner("🔍 Fetching news..."):
+            articles = search_stock_news_google(ticker, max_results=25)
 
-            if articles:
-                sentiment_counts = {s: 0 for s in sentiment_colors}
-                total_score = 0
-                scored_articles = []
+        if articles:
+            sentiment_counts = {s: 0 for s in sentiment_colors}
+            total_score = 0
+            scored_articles = []
 
-                for article in articles:
-                    title = article["title"]
-                    link = article["link"]
-                    snippet = article["snippet"]
-                    sentiment, score, pos, neg = get_sentiment_weighted(title)
-                    sentiment_counts[sentiment] += 1
-                    total_score += score
+            for article in articles:
+                title = article["title"]
+                link = article["link"]
+                snippet = article["snippet"]
+                sentiment, score, pos, neg = get_sentiment_weighted(title)
+                sentiment_counts[sentiment] += 1
+                total_score += score
 
-                    scored_articles.append({
-                        "sentiment": sentiment,
-                        "title": title,
-                        "score": score,
-                        "pos": pos,
-                        "neg": neg,
-                        "link": link,
-                        "snippet": snippet
-                    })
+                scored_articles.append({
+                    "sentiment": sentiment,
+                    "title": title,
+                    "score": score,
+                    "pos": pos,
+                    "neg": neg,
+                    "link": link,
+                    "snippet": snippet
+                })
 
-                average_score = total_score / len(scored_articles)
-                if average_score >= 3:
-                    overall = "Very Positive"
-                elif average_score > 0:
-                    overall = "Positive"
-                elif average_score == 0:
-                    overall = "Neutral"
-                elif average_score <= -3:
-                    overall = "Very Negative"
-                else:
-                    overall = "Negative"
-
-                st.markdown("### 🧾 Sentiment Summary")
-                for sentiment, count in sentiment_counts.items():
-                    color = sentiment_colors[sentiment]
-                    st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
-
-                st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
-                st.markdown("---")
-                st.markdown("### 📰 News Articles")
-
-                for article in scored_articles:
-                    sentiment = article["sentiment"]
-                    st.markdown(f"#### [{article['title']}]({article['link']}) - {sentiment}")
-                    st.write(article["snippet"])
+            average_score = total_score / len(scored_articles)
+            if average_score >= 3:
+                overall = "Very Positive"
+            elif average_score > 0:
+                overall = "Positive"
+            elif average_score == 0:
+                overall = "Neutral"
+            elif average_score <= -3:
+                overall = "Very Negative"
             else:
-                st.warning("No news articles found. Try a different ticker or check your API quota.")
-    except Exception as e:
-        st.error(f"Something went wrong while fetching news for {ticker}: {e}")
+                overall = "Negative"
 
+            st.markdown("### 🧾 Sentiment Summary")
+            for sentiment, count in sentiment_counts.items():
+                color = sentiment_colors[sentiment]
+                st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
+
+            st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
+            st.markdown("---")
+            st.markdown("### 📰 Headlines")
+
+            for item in scored_articles:
+                color = sentiment_colors[item['sentiment']]
+                with st.container():
+                    st.markdown(f"""
+                        <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
+                            <h5 style='color: {color};'>{item['sentiment']}</h5>
+                            <b>{item['title']}</b><br>
+                            <i>{item['snippet']}</i><br>
+                            <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
+                            <a href="{item['link']}" target="_blank">🔗 Read More</a>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+        else:
+            st.warning("No news articles found in the last 14 days.")
+
+    with col2:
+        st.markdown("### 📉 30-Day Stock Chart")
+        try:
+            end_date = datetime.today()
+            start_date = end_date - timedelta(days=30)
+            data = yf.download(ticker, start=start_date, end=end_date)
+            if not data.empty:
+                st.line_chart(data["Close"])
+            else:
+                st.info("No chart data available.")
+        except Exception as e:
+            st.error(f"Chart error: {e}")
+
+        st.markdown("### 🏢 Company Overview")
+        try:
+            info = yf.Ticker(ticker).info
+            st.markdown(f"""
+                <div style='background-color:white; padding: 20px; border-radius: 10px; color: black;'>
+                    <b>Sector:</b> {info.get("sector", "N/A")}<br>
+                    <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
+                    <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
+                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0), 2) if info.get("dividendYield") else "N/A"}%<br>
+                    <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
+                </div>
+            """, unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Company overview error: {e}")
