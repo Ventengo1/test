@@ -218,23 +218,26 @@ if ticker:
             st.error(f"Chart error: {e}")
 
         # --- Company Stats ---
-        st.markdown("### 🏢 Company Statistics")
-        try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
-
-            stats = {
-                "Market Cap": info.get("marketCap", "N/A"),
-                "P/E Ratio": info.get("trailingPE", "N/A"),
-                "Dividend Yield": f"{round(info.get('dividendYield', 0), 2)}%" if info.get('dividendYield') else "N/A",
-                "52-Week High": info.get("fiftyTwoWeekHigh", "N/A"),
-                "52-Week Low": info.get("fiftyTwoWeekLow", "N/A"),
-                "Sector": info.get("sector", "N/A"),
-                "Industry": info.get("industry", "N/A")
-            }
-
-            for k, v in stats.items():
-                st.write(f"**{k}:** {v}")
-
-        except Exception as e:
-            st.error(f"Could not load company stats: {e}")
+        st.markdown("### 🏢 Company Overview")
+         try:
+             info = yf.Ticker(ticker).info
+             sector = info.get("sector", "N/A")
+             market_cap = f"${round(info.get('marketCap', 0)/1e9, 2)}B"
+             pe_ratio = info.get("trailingPE", "N/A")
+             div_yield = info.get("dividendYield", None)
+             div_yield_str = f"{round((div_yield or 0), 2)}%" if div_yield else "N/A"
+             week_52_range = f"${info.get('fiftyTwoWeekLow', 'N/A')} - ${info.get('fiftyTwoWeekHigh', 'N/A')}"
+ 
+             st.markdown(f"""
+                 <div class="card" style='background-color:#f0f4fa;'>
+                     <p style='font-size:16px; color:#111;'>
+                         <b>Sector:</b> {sector}<br>
+                         <b>Market Cap:</b> {market_cap}<br>
+                         <b>P/E Ratio:</b> {pe_ratio}<br>
+                         <b>Dividend Yield:</b> {div_yield_str}<br>
+                         <b>52-Week Range:</b> {week_52_range}
+                     </p>
+                 </div>
+             """, unsafe_allow_html=True)
+         except Exception as e:
+             st.error("Could not load company info.")
