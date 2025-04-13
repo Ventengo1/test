@@ -134,7 +134,7 @@ st.markdown("""
 st.markdown("""
     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
         <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
-            <img src="https://d2vme5slygkxfz.cloudfront.net/u1uu7e%2Fpreview%2F66168390%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1744507107&Signature=RYxLHWPNtcUgIZ5nuph-1r3~naqxJkD3kBf6mGo3KaNZ-ETuNs~fvq2eU3rK4hiDK3VNqxQpXLW6NN~ltojn3dLqeHfu2~JseHyTeMewrlYmEGp0RizweAqWOs~~0pany2dZm-ZiV7e8VzVARMc0EzmI9fS~8Fa3czRKvsvIZb27E~ATs43P74pvzfmO9IADkzIFWMmM2rLULuNqgClHjRW~JVnfD-f3iPAiWMAFax5Uybc28FAmJVGtEhB2mrFdbCP0YVpw1RMVMXcodTsvJwcdk0XJ0obkWurQKBWFWYGlAk5LDEL576~o9nsQ4sA5IDson3odu1nh3OaL3FHbCA__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" width="50" alt="Logo" style="vertical-align: middle;">
+            <img src="https://d3v5mrcg9cc5a5.cloudfront.net/i6rw7e%2Fpreview%2F66168459%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1744507771&Signature=UM5M0sL6kcPiWxMaIn7VfjJc~TsKN2A8ZxTyGu1lxBLayWEpRfblRZzZl6M7bd8v9NUxP9RB-Dy~bLOAWHfBymlGaHm2uCMZBsYtBJsmofZHtb1YZlOxFoY1nJFUycIvRhuhI9Qhwf0ZHSMTmo4Y8OLlJw9Bn0R8O25KUenSq5-OAzyF6jTPGzWCPWW9-uXhFWkssDxnDLnHouMaprXE5MCdePKJM3ejdNsaqh9sBrbahEVmGhMKgKDwb~gdwOneq~bHQO53c7yhn6YD2AMLSLaPy~9UD~OEAMqn8ucHvhn85MGlslDqWzyY80md-3jZTw1nSEO2Yu2aWcsExFGkhA__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" width="50" alt="Logo" style="vertical-align: middle;">
             Stock Sentiment Analyzer
         </h2>
         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
