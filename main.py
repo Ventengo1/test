@@ -112,6 +112,23 @@ st.markdown("""
 
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
+# --- Market Index Widgets ---
+st.markdown("### 🌐 Market Overview")
+
+widget_html = """
+<div style="display: flex; justify-content: space-between; gap: 10px;">
+    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_f5e61&symbol=INDEX%3ASPX&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_f5e61"
+        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
+    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_8eae6&symbol=INDEX%3ADJI&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_8eae6"
+        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
+    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_c61a2&symbol=NASDAQ%3ANDX&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_c61a2"
+        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
+</div>
+"""
+
+st.markdown(widget_html, unsafe_allow_html=True)
+
+# --- If a ticker is entered, display sentiment and chart ---
 if ticker:
     col1, col2 = st.columns([2.3, 1.7])
 
