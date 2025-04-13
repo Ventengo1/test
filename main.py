@@ -133,7 +133,7 @@ st.markdown("""
 # --- Title ---
 st.markdown("""
     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
-        <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">📊 Stock Sentiment Analyzer</h2>
+        <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;"> Stock Sentiment Analyzer</h2>
         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
 """, unsafe_allow_html=True)
