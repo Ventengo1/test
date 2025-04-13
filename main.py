@@ -101,19 +101,26 @@ sentiment_colors = {
 }
 
 # --- App UI ---
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Stock Sentiment Analyzer")
 
+# --- Header Banner with Logo ---
 st.markdown("""
-    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
-        <h2>📈 Stock Sentiment Analyzer</h2>
-        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
+    <div style='background: linear-gradient(to right, #1c1c1c, #3e3e3e); padding: 1rem; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;'>
+        <div style='color: white; font-size: 1.5rem; font-weight: bold;'>📈 Stock Sentiment Analyzer</div>
+        <img src='https://i.imgur.com/Z6vU9fB.png' width='60' style='border-radius: 10px;' />
     </div>
 """, unsafe_allow_html=True)
 
-ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
+st.write("")
 
+# --- Input Widgets ---
+ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
+chart_range = st.selectbox("Select Chart Time Range:", ["7D", "30D", "90D", "180D"], index=1)
+sentiment_filter = st.selectbox("Filter News By Sentiment:", ["All", "Very Positive", "Positive", "Neutral", "Negative", "Very Negative"], index=0)
+
+# --- Main Logic ---
 if ticker:
-    col1, col2 = st.columns([2.3, 1.7])
+    col1, col2 = st.columns([2.5, 1.5])
 
     with col1:
         with st.spinner("🔍 Fetching news..."):
@@ -143,16 +150,7 @@ if ticker:
                 })
 
             average_score = total_score / len(scored_articles)
-            if average_score >= 3:
-                overall = "Very Positive"
-            elif average_score > 0:
-                overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
-                overall = "Very Negative"
-            else:
-                overall = "Negative"
+            overall = get_sentiment_weighted(" ".join([a['title'] for a in scored_articles]))[0]
 
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
@@ -164,6 +162,8 @@ if ticker:
             st.markdown("### 📰 Headlines")
 
             for item in scored_articles:
+                if sentiment_filter != "All" and item["sentiment"] != sentiment_filter:
+                    continue
                 color = sentiment_colors[item['sentiment']]
                 with st.container():
                     st.markdown(f"""
@@ -180,10 +180,22 @@ if ticker:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        st.markdown("### 📉 30-Day Stock Chart")
+        st.markdown("### 🧬 Company Overview")
         try:
+            info = yf.Ticker(ticker).info
+            st.write(f"**Name:** {info.get('longName', 'N/A')}")
+            st.write(f"**Sector:** {info.get('sector', 'N/A')}")
+            st.write(f"**Industry:** {info.get('industry', 'N/A')}")
+            st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+            st.write(f"**Summary:** {info.get('longBusinessSummary', 'N/A')}")
+        except:
+            st.error("Could not retrieve company information.")
+
+        st.markdown("### 📈 Stock Chart")
+        try:
+            days_map = {"7D": 7, "30D": 30, "90D": 90, "180D": 180}
             end_date = datetime.today()
-            start_date = end_date - timedelta(days=30)
+            start_date = end_date - timedelta(days=days_map[chart_range])
             data = yf.download(ticker, start=start_date, end=end_date)
             if not data.empty:
                 st.line_chart(data["Close"])
