@@ -39,7 +39,7 @@ def get_sentiment_weighted(text):
         sentiment = "Very Positive"
     elif score > 4:
         sentiment = "Positive"
-    elif score < 4:
+    elif score < -4:
         sentiment = "Negative"
     elif score <= -10:
         sentiment = "Very Negative"
