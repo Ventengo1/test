@@ -103,14 +103,19 @@ sentiment_colors = {
 # --- Streamlit UI ---
 st.set_page_config(layout="wide")
 
-# --- Banner with logo ---
-st.markdown("""
-    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
-        <h2 style="margin-bottom: 5px;">📈 Stock Sentiment Analyzer</h2>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Up_arrow_icon.svg/2048px-Up_arrow_icon.svg.png" width="60" style="margin-top: 10px;"/>
-        <p>Analyze market mood, one ticker at a time.</p>
-    </div>
-""", unsafe_allow_html=True)
+# --- Title with Logo ---  
+ st.markdown("""
+           <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
+           
+     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
+     <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
+              <img src="https://d3v5mrcg9cc5a5.cloudfront.net/i6rw7e%2Fpreview%2F66168459%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1744507771&Signature=UM5M0sL6kcPiWxMaIn7VfjJc~TsKN2A8ZxTyGu1lxBLayWEpRfblRZzZl6M7bd8v9NUxP9RB-Dy~bLOAWHfBymlGaHm2uCMZBsYtBJsmofZHtb1YZlOxFoY1nJFUycIvRhuhI9Qhwf0ZHSMTmo4Y8OLlJw9Bn0R8O25KUenSq5-OAzyF6jTPGzWCPWW9-uXhFWkssDxnDLnHouMaprXE5MCdePKJM3ejdNsaqh9sBrbahEVmGhMKgKDwb~gdwOneq~bHQO53c7yhn6YD2AMLSLaPy~9UD~OEAMqn8ucHvhn85MGlslDqWzyY80md-3jZTw1nSEO2Yu2aWcsExFGkhA__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" width="50" alt="Logo" style="vertical-align: middle;">
+              Stock Sentiment Analyzer
+          </h2>
+     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
+         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
+     </div>
+ """, unsafe_allow_html=True)
 
 # --- Widgets ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
