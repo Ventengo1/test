@@ -107,13 +107,30 @@ st.set_page_config(layout="wide")
 st.markdown("""
     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0); padding: 1rem; border-radius: 10px;'>
         <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
-            <img src="https://d3v5mrcg9cc5a5.cloudfront.net/i6rw7e%2Fpreview%2F66168459%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1744507771&Signature=UM5M0sL6kcPiWxMaIn7VfjJc~TsKN2A8ZxTyGu1lxBLayWEpRfblRZzZl6M7bd8v9NUxP9RB-Dy~bLOAWHfBymlGaHm2uCMZBsYtBJsmofZHtb1YZlOxFoY1nJFUycIvRhuhI9Qhwf0ZHSMTmo4Y8OLlJw9Bn0R8O25KUenSq5-OAzyF6jTPGzWCPWW9-uXhFWkssDxnDLnHouMaprXE5MCdePKJM3ejdNsaqh9sBrbahEVmGhMKgKDwb~gdwOneq~bHQO53c7yhn6YD2AMLSLaPy~9UD~OEAMqn8ucHvhn85MGlslDqWzyY80md-3jZTw1nSEO2Yu2aWcsExFGkhA__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ"
+            <img src="https://i.ibb.co/wNLf7hDj/Screenshot-2025-04-12-210441-removebg-preview.png"
                  width="50" alt="Logo" style="vertical-align: middle; margin-right: 10px;">
             Stock Sentiment Analyzer
         </h2>
         <p style='color: #333; font-size: 0.9rem; margin-top: 0.2rem;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
 """, unsafe_allow_html=True)
+
+# --- Main Index Widgets ---
+st.markdown("### 🌍 Market Overview")
+st.components.v1.html("""
+    <div style="display: flex; justify-content: space-around;">
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e09e3&symbol=NASDAQ%3ANDX&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=SPXM&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=DJI&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+    </div>
+""", height=320)
+
 
 
 # --- Widgets ---
