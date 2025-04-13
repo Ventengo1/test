@@ -138,36 +138,21 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- TradingView Widget for S&P 500 (SPXM) ---
-st.markdown("""
-<!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container" style="height:100%;width:100%">
-  <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
-  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-  {
-    "frameElementId": "tradingview_67890",
-    "symbol": "SPXM",
-    "interval": "D",
-    "symboledit": 1,
-    "saveimage": 1,
-    "toolbarbg": "#f1f3f6",
-    "studies": [],
-    "theme": "light",
-    "style": 1,
-    "timezone": "Etc/UTC",
-    "withdateranges": 1,
-    "hideideas": 1,
-    "studies_overrides": {},
-    "overrides": {},
-    "enabled_features": [],
-    "disabled_features": [],
-    "locale": "en"
-  }
-  </script>
-</div>
-<!-- TradingView Widget END -->
-""", unsafe_allow_html=True)
+# --- Main Index Widgets ---
+st.markdown("### 🌍 Market Overview")
+st.components.v1.html("""
+    <div style="display: flex; justify-content: space-around;">
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e09e3&symbol=NASDAQ%3ANDX&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=SPXM&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=DJI&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+    </div>
+""", height=320)
 
 # --- Input ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
@@ -238,7 +223,6 @@ if ticker:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        # --- Chart ---
         st.markdown("### 📈 30-Day Stock Chart")
         try:
             end_date = datetime.today()
@@ -251,7 +235,6 @@ if ticker:
         except Exception as e:
             st.error(f"Chart error: {e}")
 
-        # --- Company Overview ---
         st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
