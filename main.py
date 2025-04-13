@@ -162,62 +162,63 @@ with col3:
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
 if ticker:
-    col1, col2 = st.columns([2.3, 1.7])
+    try:
+        col1, col2 = st.columns([2.3, 1.7])
 
-    # News and Sentiment Analysis Section
-    with col1:
-        with st.spinner("🔍 Fetching news..."):
-            articles = search_stock_news_google(ticker, max_results=25)
+        with col1:
+            with st.spinner("🔍 Fetching news..."):
+                articles = search_stock_news_google(ticker, max_results=25)
 
-        if articles:
-            sentiment_counts = {s: 0 for s in sentiment_colors}
-            total_score = 0
-            scored_articles = []
+            if articles:
+                sentiment_counts = {s: 0 for s in sentiment_colors}
+                total_score = 0
+                scored_articles = []
 
-            for article in articles:
-                title = article["title"]
-                link = article["link"]
-                snippet = article["snippet"]
-                sentiment, score, pos, neg = get_sentiment_weighted(title)
-                sentiment_counts[sentiment] += 1
-                total_score += score
+                for article in articles:
+                    title = article["title"]
+                    link = article["link"]
+                    snippet = article["snippet"]
+                    sentiment, score, pos, neg = get_sentiment_weighted(title)
+                    sentiment_counts[sentiment] += 1
+                    total_score += score
 
-                scored_articles.append({
-                    "sentiment": sentiment,
-                    "title": title,
-                    "score": score,
-                    "pos": pos,
-                    "neg": neg,
-                    "link": link,
-                    "snippet": snippet
-                })
+                    scored_articles.append({
+                        "sentiment": sentiment,
+                        "title": title,
+                        "score": score,
+                        "pos": pos,
+                        "neg": neg,
+                        "link": link,
+                        "snippet": snippet
+                    })
 
-            average_score = total_score / len(scored_articles)
-            if average_score >= 3:
-                overall = "Very Positive"
-            elif average_score > 0:
-                overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
-                overall = "Very Negative"
+                average_score = total_score / len(scored_articles)
+                if average_score >= 3:
+                    overall = "Very Positive"
+                elif average_score > 0:
+                    overall = "Positive"
+                elif average_score == 0:
+                    overall = "Neutral"
+                elif average_score <= -3:
+                    overall = "Very Negative"
+                else:
+                    overall = "Negative"
+
+                st.markdown("### 🧾 Sentiment Summary")
+                for sentiment, count in sentiment_counts.items():
+                    color = sentiment_colors[sentiment]
+                    st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
+
+                st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
+                st.markdown("---")
+                st.markdown("### 📰 News Articles")
+
+                for article in scored_articles:
+                    sentiment = article["sentiment"]
+                    st.markdown(f"#### [{article['title']}]({article['link']}) - {sentiment}")
+                    st.write(article["snippet"])
             else:
-                overall = "Negative"
+                st.warning("No news articles found. Try a different ticker or check your API quota.")
+    except Exception as e:
+        st.error(f"Something went wrong while fetching news for {ticker}: {e}")
 
-            st.markdown("### 🧾 Sentiment Summary")
-            for sentiment, count in sentiment_counts.items():
-                color = sentiment_colors[sentiment]
-                st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
-
-            st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
-            st.markdown("---")
-            st.markdown("### 📰 News Articles")
-
-            for article in scored_articles:
-                sentiment = article["sentiment"]
-                st.markdown(f"#### [{article['title']}]({article['link']}) - {sentiment}")
-                st.write(article["snippet"])
-
-    # If no ticker, show placeholder message
-else:
-    st.write("Please enter a stock ticker symbol to analyze news.")
