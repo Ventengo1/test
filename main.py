@@ -177,7 +177,7 @@ if ticker:
             elif average_score <= -10:
                 overall = "Very Negative"
             else:
-                overall = "Negutral"
+                overall = "Neutral"
 
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
