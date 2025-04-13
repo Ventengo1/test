@@ -34,16 +34,16 @@ def get_sentiment_weighted(text):
             score -= 1
             neg_count += 1
 
-    if score >= 3:
+    if score >= 9:
         sentiment = "Very Positive"
-    elif score > 0:
+    elif score > 4:
         sentiment = "Positive"
-    elif score == 0:
-        sentiment = "Neutral"
-    elif score <= -3:
+    elif score <-4:
+        sentiment = "Negative"
+    elif score <= -9:
         sentiment = "Very Negative"
     else:
-        sentiment = "Negative"
+        sentiment = "Neutral"
 
     return sentiment, score, pos_count, neg_count
 
@@ -226,7 +226,7 @@ if ticker:
             stats = {
                 "Market Cap": info.get("marketCap", "N/A"),
                 "P/E Ratio": info.get("trailingPE", "N/A"),
-                "Dividend Yield": f"{round(info.get('dividendYield', 0) * 100, 2)}%" if info.get('dividendYield') else "N/A",
+                "Dividend Yield": f"{round(info.get('dividendYield', 0), 2)}%" if info.get('dividendYield') else "N/A",
                 "52-Week High": info.get("fiftyTwoWeekHigh", "N/A"),
                 "52-Week Low": info.get("fiftyTwoWeekLow", "N/A"),
                 "Sector": info.get("sector", "N/A"),
