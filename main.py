@@ -219,7 +219,7 @@ if ticker:
 
         # --- Company Stats ---
         st.markdown("### 🏢 Company Overview")
-         try:
+        try:
              info = yf.Ticker(ticker).info
              sector = info.get("sector", "N/A")
              market_cap = f"${round(info.get('marketCap', 0)/1e9, 2)}B"
