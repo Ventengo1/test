@@ -39,11 +39,11 @@ def get_sentiment_weighted(text):
     elif score > 4:
         sentiment = "Positive"
     elif score < 4 and score > -4:
-        sentiment = "Negative"
+        sentiment = "Neutral"
     elif score <= -10:
         sentiment = "Very Negative"
     else:
-        sentiment = "Neutral"
+        sentiment = "Negative"
 
     return sentiment, score, pos_count, neg_count
 
@@ -105,8 +105,6 @@ st.set_page_config(layout="wide")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
     html, body, [class*="css"]  {
         font-family: 'Inter', sans-serif;
         background-color: #f5f7fa;
@@ -130,33 +128,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Title with Logo ---  
+# --- Title ---  
 st.markdown("""
-          
     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
     <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
-             <img src="https://d3v5mrcg9cc5a5.cloudfront.net/i6rw7e%2Fpreview%2F66168459%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1744507771&Signature=UM5M0sL6kcPiWxMaIn7VfjJc~TsKN2A8ZxTyGu1lxBLayWEpRfblRZzZl6M7bd8v9NUxP9RB-Dy~bLOAWHfBymlGaHm2uCMZBsYtBJsmofZHtb1YZlOxFoY1nJFUycIvRhuhI9Qhwf0ZHSMTmo4Y8OLlJw9Bn0R8O25KUenSq5-OAzyF6jTPGzWCPWW9-uXhFWkssDxnDLnHouMaprXE5MCdePKJM3ejdNsaqh9sBrbahEVmGhMKgKDwb~gdwOneq~bHQO53c7yhn6YD2AMLSLaPy~9UD~OEAMqn8ucHvhn85MGlslDqWzyY80md-3jZTw1nSEO2Yu2aWcsExFGkhA__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ" width="50" alt="Logo" style="vertical-align: middle;">
              Stock Sentiment Analyzer
          </h2>
         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
 """, unsafe_allow_html=True)
-
-# --- Main Index Widgets ---
-st.markdown("### 🌍 Market Overview")
-st.components.v1.html("""
-    <div style="display: flex; justify-content: space-around;">
-        <div style="width: 30%;">
-            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e09e3&symbol=NASDAQ%3ANDX&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
-        </div>
-        <div style="width: 30%;">
-            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=SPXM&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
-        </div>
-        <div style="width: 30%;">
-            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=DJI&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
-        </div>
-    </div>
-""", height=320)
 
 # --- Input ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
@@ -191,22 +171,22 @@ if ticker:
                     "snippet": snippet
                 })
 
-            average_score = total_score / len(scored_articles)
-            if average_score >= 3:
-                overall = "Very Positive"
-            elif average_score > 0:
-                overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
-                overall = "Very Negative"
-            else:
-                overall = "Negative"
-
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
                 color = sentiment_colors[sentiment]
                 st.markdown(f"<div class='sentiment-box' style='background-color:{color}33;'><b style='color:{color}'>{sentiment}:</b> {count}</div>", unsafe_allow_html=True)
+
+            avg_score = total_score / len(scored_articles)
+            if avg_score >= 10:
+                overall = "Very Positive"
+            elif avg_score > 4:
+                overall = "Positive"
+            elif avg_score > -4:
+                overall = "Neutral"
+            elif avg_score <= -10:
+                overall = "Very Negative"
+            else:
+                overall = "Negative"
 
             st.markdown(f"<h4>📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'>{ticker}</span>: <b>{overall}</b></h4>", unsafe_allow_html=True)
             st.markdown("### 📰 Headlines")
