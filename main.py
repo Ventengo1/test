@@ -104,7 +104,7 @@ sentiment_colors = {
 st.set_page_config(layout="wide")
 
 # --- Title with Logo ---  
- st.markdown("""
+     st.markdown("""
            <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
            
      <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
