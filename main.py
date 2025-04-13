@@ -21,6 +21,11 @@ def get_sentiment_weighted(text):
     score = 0
     pos_count = neg_count = 0
 
+    def get_sentiment_weighted(text):
+    words = re.findall(r'\b\w+\b', text.lower())
+    score = 0
+    pos_count = neg_count = 0
+
     for word in words:
         if word in very_positive_keywords:
             score += 2
@@ -34,6 +39,7 @@ def get_sentiment_weighted(text):
         elif word in negative_keywords:
             score -= 1
             neg_count += 1
+
 
     if score >= 10:
         sentiment = "Very Positive"
