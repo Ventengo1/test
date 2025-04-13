@@ -242,7 +242,7 @@ if ticker:
             market_cap = f"${round(info.get('marketCap', 0)/1e9, 2)}B"
             pe_ratio = info.get("trailingPE", "N/A")
             div_yield = info.get("dividendYield", None)
-            div_yield_str = f"{round((div_yield or 0)*100, 2)}%" if div_yield else "N/A"
+            div_yield_str = f"{round((div_yield or 0), 2)}%" if div_yield else "N/A"
             week_52_range = f"${info.get('fiftyTwoWeekLow', 'N/A')} - ${info.get('fiftyTwoWeekHigh', 'N/A')}"
 
             st.markdown(f"""
