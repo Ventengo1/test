@@ -38,7 +38,7 @@ def get_sentiment_weighted(text):
         sentiment = "Very Positive"
     elif score > 4:
         sentiment = "Positive"
-    elif score < 4:
+    elif score < 4 and score > -4:
         sentiment = "Negative"
     elif score <= -10:
         sentiment = "Very Negative"
@@ -93,42 +93,80 @@ def search_stock_news_google(stock_symbol, max_results=25):
 
 # --- Custom Badge Colors ---
 sentiment_colors = {
-    "Very Positive": "#27ae60",
+    "Very Positive": "#1abc9c",
     "Positive": "#2ecc71",
     "Neutral": "#95a5a6",
-    "Negative": "#e74c3c",
-    "Very Negative": "#c0392b"
+    "Negative": "#e67e22",
+    "Very Negative": "#e74c3c"
 }
 
-# --- App UI ---
+# --- App UI Styling ---
 st.set_page_config(layout="wide")
 
 st.markdown("""
-    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
-        <h2>📈 Stock Sentiment Analyzer</h2>
-        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+    html, body, [class*="css"]  {
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f7fa;
+        color: #222;
+    }
+    .card {
+        background-color: #eaf0f7;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+    .sentiment-box {
+        padding: 12px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    h2, h3, h4 {
+        color: #111;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- Title ---
+st.markdown("""
+    <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
+        <h2>📊 Stock Sentiment Analyzer</h2>
+        <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
 """, unsafe_allow_html=True)
 
+# --- Major Indexes Section ---
+st.markdown("### 🌐 Market Overview: Major Indexes")
+
+index_symbols = {
+    "S&P 500": "^GSPC",
+    "Nasdaq": "^IXIC",
+    "Dow Jones": "^DJI"
+}
+
+index_cols = st.columns(len(index_symbols))
+
+for i, (name, symbol) in enumerate(index_symbols.items()):
+    with index_cols[i]:
+        st.markdown(f"#### {name}")
+        try:
+            index_data = yf.download(symbol, period="30d", interval="1d")
+            if not index_data.empty:
+                st.line_chart(index_data["Close"])
+                delta = round(index_data["Close"][-1] - index_data["Close"][0], 2)
+                pct_change = round((delta / index_data["Close"][0]) * 100, 2)
+                st.markdown(f"**30-Day Change:** {delta:+} ({pct_change:+}%)")
+            else:
+                st.info("No chart data.")
+        except Exception as e:
+            st.error(f"Failed to load {name} data.")
+
+# --- Input ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
-# --- Market Index Widgets ---
-st.markdown("### 🌐 Market Overview")
-
-widget_html = """
-<div style="display: flex; justify-content: space-between; gap: 10px;">
-    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_f5e61&symbol=INDEX%3ASPX&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_f5e61"
-        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
-    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_8eae6&symbol=INDEX%3ADJI&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_8eae6"
-        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
-    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_c61a2&symbol=NASDAQ%3ANDX&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&hide_top_toolbar=1&enable_publishing=false&allow_symbol_change=true&container_id=tradingview_c61a2"
-        style="width: 32%; height: 280px; border: none; background: black;" allowfullscreen></iframe>
-</div>
-"""
-
-st.markdown(widget_html, unsafe_allow_html=True)
-
-# --- If a ticker is entered, display sentiment and chart ---
 if ticker:
     col1, col2 = st.columns([2.3, 1.7])
 
@@ -174,30 +212,28 @@ if ticker:
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
                 color = sentiment_colors[sentiment]
-                st.markdown(f"<span style='color:{color}; font-weight:600'>{sentiment}:</span> {count}", unsafe_allow_html=True)
+                st.markdown(f"<div class='sentiment-box' style='background-color:{color}33;'><b style='color:{color}'>{sentiment}:</b> {count}</div>", unsafe_allow_html=True)
 
-            st.markdown(f"### 📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'><strong>{ticker}</strong>: {overall}</span>", unsafe_allow_html=True)
-            st.markdown("---")
+            st.markdown(f"<h4>📊 Overall Sentiment for <span style='color:{sentiment_colors[overall]}'>{ticker}</span>: <b>{overall}</b></h4>", unsafe_allow_html=True)
             st.markdown("### 📰 Headlines")
 
             for item in scored_articles:
                 color = sentiment_colors[item['sentiment']]
-                with st.container():
-                    st.markdown(f"""
-                        <div style='border-left: 5px solid {color}; padding-left: 15px; margin-bottom: 10px;'>
-                            <h5 style='color: {color};'>{item['sentiment']}</h5>
-                            <b>{item['title']}</b><br>
-                            <i>{item['snippet']}</i><br>
-                            <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
-                            <a href="{item['link']}" target="_blank">🔗 Read More</a>
-                        </div>
-                    """, unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="card">
+                        <h4 style='color:{color};'>{item['sentiment']}</h4>
+                        <b>{item['title']}</b><br>
+                        <i>{item['snippet']}</i><br><br>
+                        <small>👍 {item['pos']} | 👎 {item['neg']} | Score: {item['score']}</small><br>
+                        <a href="{item['link']}" target="_blank">🔗 Read More</a>
+                    </div>
+                """, unsafe_allow_html=True)
 
         else:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        st.markdown("### 📉 30-Day Stock Chart")
+        st.markdown("### 📈 30-Day Stock Chart")
         try:
             end_date = datetime.today()
             start_date = end_date - timedelta(days=30)
@@ -212,14 +248,23 @@ if ticker:
         st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
+            sector = info.get("sector", "N/A")
+            market_cap = f"${round(info.get('marketCap', 0)/1e9, 2)}B"
+            pe_ratio = info.get("trailingPE", "N/A")
+            div_yield = info.get("dividendYield", None)
+            div_yield_str = f"{round((div_yield or 0)*100, 2)}%" if div_yield else "N/A"
+            week_52_range = f"${info.get('fiftyTwoWeekLow', 'N/A')} - ${info.get('fiftyTwoWeekHigh', 'N/A')}"
+
             st.markdown(f"""
-                <div style='background-color:white; padding: 20px; border-radius: 10px; color: black;'>
-                    <b>Sector:</b> {info.get("sector", "N/A")}<br>
-                    <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
-                    <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0), 2) if info.get("dividendYield") else "N/A"}%<br>
-                    <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
+                <div class="card" style='background-color:#f0f4fa;'>
+                    <p style='font-size:16px; color:#111;'>
+                        <b>Sector:</b> {sector}<br>
+                        <b>Market Cap:</b> {market_cap}<br>
+                        <b>P/E Ratio:</b> {pe_ratio}<br>
+                        <b>Dividend Yield:</b> {div_yield_str}<br>
+                        <b>52-Week Range:</b> {week_52_range}
+                    </p>
                 </div>
             """, unsafe_allow_html=True)
         except Exception as e:
-            st.error(f"Company overview error: {e}")
+            st.error("Could not load company info.")
