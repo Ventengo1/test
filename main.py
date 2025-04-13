@@ -100,9 +100,19 @@ sentiment_colors = {
     "Very Negative": "#c0392b"
 }
 
+# --- Fetch Index Data ---
+def get_index_data(symbol):
+    index = yf.Ticker(symbol)
+    hist = index.history(period="1d")
+    current_price = hist['Close'].iloc[0]
+    change = hist['Close'].iloc[0] - hist['Open'].iloc[0]
+    percentage_change = (change / hist['Open'].iloc[0]) * 100
+    return current_price, change, percentage_change
+
 # --- App UI ---
 st.set_page_config(layout="wide")
 
+# Header Section
 st.markdown("""
     <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
         <h2>📈 Stock Sentiment Analyzer</h2>
@@ -110,11 +120,51 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# Enter Stock Ticker Section
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
 if ticker:
     col1, col2 = st.columns([2.3, 1.7])
 
+    # --- Stock Index Widgets ---
+    st.markdown("### Major Stock Indexes")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        # Dow Jones Industrial Average (DJIA)
+        djia_price, djia_change, djia_pct = get_index_data("^DJI")
+        st.markdown(f"""
+            <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
+                <h3>Dow Jones</h3>
+                <p><strong>Price:</strong> ${djia_price:,.2f}</p>
+                <p><strong>Change:</strong> ${djia_change:,.2f} ({djia_pct:+.2f}%)</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        # NASDAQ Composite
+        nasdaq_price, nasdaq_change, nasdaq_pct = get_index_data("^IXIC")
+        st.markdown(f"""
+            <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
+                <h3>NASDAQ</h3>
+                <p><strong>Price:</strong> ${nasdaq_price:,.2f}</p>
+                <p><strong>Change:</strong> ${nasdaq_change:,.2f} ({nasdaq_pct:+.2f}%)</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        # S&P 500
+        sp500_price, sp500_change, sp500_pct = get_index_data("^GSPC")
+        st.markdown(f"""
+            <div style='background-color:#2c3e50; color:white; padding: 10px; border-radius: 10px;'>
+                <h3>S&P 500</h3>
+                <p><strong>Price:</strong> ${sp500_price:,.2f}</p>
+                <p><strong>Change:</strong> ${sp500_change:,.2f} ({sp500_pct:+.2f}%)</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # News and Sentiment Analysis Section
     with col1:
         with st.spinner("🔍 Fetching news..."):
             articles = search_stock_news_google(ticker, max_results=25)
