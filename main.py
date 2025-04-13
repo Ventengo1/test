@@ -1,4 +1,4 @@
-import re
+import re 
 import streamlit as st
 import requests
 import yfinance as yf
@@ -104,23 +104,9 @@ sentiment_colors = {
 st.set_page_config(layout="wide")
 
 st.markdown("""
-    <style>
-        body {
-            background-color: #f4f6f9;
-            color: #000000;
-        }
-        .main {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 10px;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-    <div style='background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 10px; text-align: center; color: #000000;'>
-        <h2 style='margin-bottom: 0;'>📈 Stock Sentiment Analyzer</h2>
-        <p style='margin-top: 5px; color: #555;'>News + Sentiment + Charts in one dashboard</p>
+    <div style='background: linear-gradient(to right, #003973, #e5e5be); padding: 1.5rem; border-radius: 10px; text-align: center; color: white;'>
+        <h2>📈 Stock Sentiment Analyzer</h2>
+        <p>Color-coded headlines + sentiment summary + chart — all in one place!</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -193,31 +179,50 @@ if ticker:
         else:
             st.warning("No news articles found in the last 14 days.")
 
-    with col2:
-        st.markdown("### 📉 30-Day Stock Chart")
-        try:
-            end_date = datetime.today()
-            start_date = end_date - timedelta(days=30)
-            data = yf.download(ticker, start=start_date, end=end_date)
-            if not data.empty:
-                st.line_chart(data["Close"])
-            else:
-                st.info("No chart data available.")
-        except Exception as e:
-            st.error(f"Chart error: {e}")
+with col2:
+    st.markdown("### 📉 30-Day Stock Chart")
+    try:
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=30)
+        data = yf.download(ticker, start=start_date, end=end_date)
+        if not data.empty:
+            st.line_chart(data["Close"])
+        else:
+            st.info("No chart data available.")
+    except Exception as e:
+        st.error(f"Chart error: {e}")
 
-        st.markdown("---")
-        st.markdown("### 🏢 Company Overview")
-        try:
-            info = yf.Ticker(ticker).info
-            st.markdown(f"""
-                <div style='background-color: #ffffff; padding: 15px; border-radius: 10px; color: black; font-size: 16px;'>
-                    <b>Sector:</b> {info.get("sector", "N/A")}<br>
-                    <b>Market Cap:</b> ${round(info.get("marketCap", 0)/1e9, 2)}B<br>
-                    <b>P/E Ratio:</b> {info.get("trailingPE", "N/A")}<br>
-                    <b>Dividend Yield:</b> {round(info.get("dividendYield", 0)*100/100, 2) if info.get("dividendYield") else "N/A"}%<br>
-                    <b>52-Week Range:</b> ${info.get("fiftyTwoWeekLow", "N/A")} - ${info.get("fiftyTwoWeekHigh", "N/A")}
-                </div>
-            """, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Company info error: {e}")
+    # --- Company Overview ---
+    st.markdown("### 🏢 Company Overview")
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        info = ticker_obj.info
+
+        sector = info.get("sector", "N/A")
+        market_cap = round(info.get("marketCap", 0) / 1e9, 2)
+        pe_ratio = info.get("trailingPE", "N/A")
+            dividend_yield = (
+            f"{round(info.get('dividendYield', 0) * 100, 2)}%" if info.get("dividendYield") else "N/A")
+        fifty_two_week_low = round(info.get("fiftyTwoWeekLow", 0), 2)
+        fifty_two_week_high = round(info.get("fiftyTwoWeekHigh", 0), 2)
+
+        st.markdown(f"""
+            <div style="
+                background-color: #ffffff;
+                color: #000000;
+                padding: 1.2rem;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                font-size: 1.1rem;
+                line-height: 1.7;
+            ">
+                <b>Sector:</b> {sector}<br>
+                <b>Market Cap:</b> ${market_cap}B<br>
+                <b>P/E Ratio:</b> {pe_ratio}<br>
+                <b>Dividend Yield:</b> {dividend_yield}<br>
+                <b>52-Week Range:</b> ${fifty_two_week_low} - ${fifty_two_week_high}
+            </div>
+        """, unsafe_allow_html=True)
+
+    except Exception as e:
+        st.warning(f"Couldn't load company overview: {e}")
