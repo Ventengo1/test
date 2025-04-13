@@ -34,12 +34,13 @@ def get_sentiment_weighted(text):
             score -= 1
             neg_count += 1
 
-    if score >= 9:
+    if score >= 6:
         sentiment = "Very Positive"
-    elif score > 4:
+    elif score > 1:
         sentiment = "Positive"
-    elif -5 < score < 5: sentiment = "Neutral"
-    elif score <= -9:
+    elif score >= -1 and score <= 1:
+        sentiment = "Neutral"
+    elif score < -6:
         sentiment = "Very Negative"
     else:
         sentiment = "Negative"
@@ -167,16 +168,16 @@ if ticker:
                 })
 
             average_score = total_score / len(scored_articles)
-            if average_score >= 3:
+            if average_score >= 10:
                 overall = "Very Positive"
-            elif average_score > 0:
+            elif average_score > 3:
                 overall = "Positive"
-            elif average_score == 0:
-                overall = "Neutral"
-            elif average_score <= -3:
+            elif average_score < -3:
+                overall = "Negative"
+            elif average_score <= -10:
                 overall = "Very Negative"
             else:
-                overall = "Negative"
+                overall = "Negutral"
 
             st.markdown("### 🧾 Sentiment Summary")
             for sentiment, count in sentiment_counts.items():
