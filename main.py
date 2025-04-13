@@ -11,9 +11,9 @@ CSE_ID = "079514f6bfc78415e"
 
 # --- Sentiment Keywords ---
 very_positive_keywords = {"skyrocket", "blockbuster", "blowout", "explode", "unprecedented", "all time high", "record-breaking", "soars", "multiple", "expansion", "soar"}
-positive_keywords = {"gain", "trending", "high", "gains", "rise", "rises", "raises", "beat", "beats" "expectations", "surge", "surges", "record", "profit", "strong", "up", "increase", "increases", "growth", "positive", "upgrade", "upgraded", "buy", "bullish", "rally", "boost", "opportunity", "leads", "upside", "boosts", "rallied", "outperforms", "accelerating", "great", "rebounds", "Bull"}
-negative_keywords = {"loss", "fall", "falls", "drop", "drops", "decline", "miss", "misses", "shortfall", "cut", "downgrade", "downgraded", "margin shortfall", "bearish", "warn", "weak", "down", "decrease", "layoff", "negative", "recall", "lawsuit", "hurt", "tariffs", "missed", "bad", "crossfire", "lower"}
-very_negative_keywords = {"collapse", "bankruptcy", "scandal", "meltdown", "fraud", "devastating", "catastrophic", "all-time low", "crash", "underperforming", "plunge", "plunges", "crisis", "death", "cross"}
+positive_keywords = {"gain", "trending", "high", "gains", "rise", "rises", "raises", "beat", "beats" "expectations", "surge", "surges", "record", "profit", "strong", "up", "increase", "increases", "growth", "positive", "upgrade", "upgraded", "buy", "bullish", "rally", "boost", "opportunity", "leads", "upside", "boosts", "rallied", "outperforms", "accelerating", "great", "rebounds", "Bull", "best"}
+negative_keywords = {"loss", "fall", "falls", "drop", "drops", "decline", "miss", "misses", "shortfall", "cut", "downgrade", "downgraded", "margin shortfall", "bearish", "warn", "weak", "down", "decrease", "layoff", "negative", "recall", "lawsuit", "hurt", "tariffs", "missed", "bad", "crossfire", "lower", "slams", "cut", "cuts", "downgrades", "slides", "pain"}
+very_negative_keywords = {"collapse", "bankruptcy", "scandal", "meltdown", "fraud", "devastating", "catastrophic", "all-time low", "crash", "underperforming", "plunge", "plunges", "crisis", "death", "cross", "plummeting", "slashes", "collapsed", "crater", }
 
 # --- Sentiment Scoring ---
 def get_sentiment_weighted(text):
