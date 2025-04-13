@@ -115,6 +115,22 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# --- Main Index Widgets ---
+st.markdown("### 🌍 Market Overview")
+st.components.v1.html("""
+    <div style="display: flex; justify-content: space-around;">
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_e09e3&symbol=NASDAQ%3ANDX&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=SPXM&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+        <div style="width: 30%;">
+            <iframe src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_67890&symbol=DJI&interval=D&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="300" frameborder="0"></iframe>
+        </div>
+    </div>
+""", height=320)
+
 
 # --- Widgets ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
