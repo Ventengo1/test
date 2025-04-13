@@ -138,32 +138,6 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- Major Indexes Section ---
-st.markdown("### 🌐 Market Overview: Major Indexes")
-
-index_symbols = {
-    "S&P 500": "^GSPC",
-    "Nasdaq": "^IXIC",
-    "Dow Jones": "^DJI"
-}
-
-index_cols = st.columns(len(index_symbols))
-
-for i, (name, symbol) in enumerate(index_symbols.items()):
-    with index_cols[i]:
-        st.markdown(f"#### {name}")
-        try:
-            index_data = yf.download(symbol, period="30d", interval="1d")
-            if not index_data.empty:
-                st.line_chart(index_data["Close"])
-                delta = round(index_data["Close"][-1] - index_data["Close"][0], 2)
-                pct_change = round((delta / index_data["Close"][0]) * 100, 2)
-                st.markdown(f"**30-Day Change:** {delta:+} ({pct_change:+}%)")
-            else:
-                st.info("No chart data.")
-        except Exception as e:
-            st.error(f"Failed to load {name} data.")
-
 # --- Input ---
 ticker = st.text_input("Enter Stock Ticker Symbol (e.g., AAPL, TSLA):", "").upper()
 
@@ -233,18 +207,35 @@ if ticker:
             st.warning("No news articles found in the last 14 days.")
 
     with col2:
-        st.markdown("### 📈 30-Day Stock Chart")
-        try:
-            end_date = datetime.today()
-            start_date = end_date - timedelta(days=30)
-            data = yf.download(ticker, start=start_date, end=end_date)
-            if not data.empty:
-                st.line_chart(data["Close"])
-            else:
-                st.info("No chart data available.")
-        except Exception as e:
-            st.error(f"Chart error: {e}")
+        # --- TradingView Widget ---
+        st.markdown("### 📈 Interactive Chart")
+        tv_widget = f"""
+            <div class="tradingview-widget-container">
+              <div id="tradingview_{ticker}"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+              <script type="text/javascript">
+              new TradingView.widget({{
+                "width": "100%",
+                "height": 400,
+                "symbol": "NASDAQ:{ticker}",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "light",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "container_id": "tradingview_{ticker}"
+              }});
+              </script>
+            </div>
+        """
+        st.components.v1.html(tv_widget, height=420)
 
+        # --- Company Overview ---
         st.markdown("### 🏢 Company Overview")
         try:
             info = yf.Ticker(ticker).info
