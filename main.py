@@ -168,13 +168,13 @@ if ticker:
                 })
 
             average_score = total_score / len(scored_articles)
-            if average_score >= 1:
+            if average_score >= 0.35:
                 overall = "Very Positive"
             elif average_score > 0.2:
                 overall = "Positive"
             elif average_score < -0.2:
                 overall = "Negative"
-            elif average_score <= -1:
+            elif average_score <= -0.35:
                 overall = "Very Negative"
             else:
                 overall = "Neutral"
