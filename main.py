@@ -132,6 +132,10 @@ st.markdown("""
 
 # --- Title with Logo ---  
 st.markdown("""
+ <h2 style="color: black; font-family: 'Roboto', sans-serif; font-weight: 700;">
+             
+             Stock Sentiment Analyzer
+         </h2>
     <div class="card" style='text-align: center; background: linear-gradient(to right, #dff2fd, #d1f4e0);'>
         <p style='color: #333;'>Visualize market sentiment, headlines, and performance trends all in one place.</p>
     </div>
